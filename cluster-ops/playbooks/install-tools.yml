@@ -1,0 +1,52 @@
+---
+# =============================================================================
+# install-tools.yml - provision the operator workstation toolchain.
+#
+#   ansible-playbook playbooks/install-tools.yml
+#
+# Installs kops, kubectl, helm, argocd (plus terraform, yq, kubeconform and
+# tflint, which the rest of this repo depends on) at the exact versions pinned
+# in group_vars/all.yml. Safe to re-run: already-correct tools are skipped.
+# =============================================================================
+
+- name: Install pinned operator toolchain
+  hosts: controller
+  gather_facts: true
+  become: true
+
+  pre_tasks:
+    - name: Require a 64-bit Linux controller
+      ansible.builtin.assert:
+        that:
+          - ansible_system == "Linux"
+          - ansible_architecture == "x86_64"
+        fail_msg: >-
+          This role only ships linux/amd64 artefacts; detected
+          {{ ansible_system }}/{{ ansible_architecture }}.
+
+    - name: Require the AWS CLI (installed out of band, holds the credentials)
+      ansible.builtin.command: aws --version
+      register: awscli_check
+      changed_when: false
+
+    - name: Show AWS CLI version
+      ansible.builtin.debug:
+        msg: "{{ (awscli_check.stderr or awscli_check.stdout) | trim }}"
+
+  roles:
+    - tools
+
+  post_tasks:
+    - name: Confirm AWS credentials resolve to the expected account
+      ansible.builtin.command: aws sts get-caller-identity --output json
+      register: sts
+      changed_when: false
+
+    - name: Assert AWS account
+      ansible.builtin.assert:
+        that:
+          - (sts.stdout | from_json).Account == aws_account_id
+        fail_msg: >-
+          Expected AWS account {{ aws_account_id }} but the CLI is authenticated
+          against {{ (sts.stdout | from_json).Account }}.
+        success_msg: "Authenticated to AWS account {{ aws_account_id }} as {{ (sts.stdout | from_json).Arn }}"

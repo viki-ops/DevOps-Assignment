@@ -1,0 +1,60 @@
+---
+# Declarative description of the operator toolchain.
+#
+#   kind   - binary | zip | tar   (how the artefact is packaged upstream)
+#   probe  - shell pipeline printing ONLY the bare version string (no leading
+#            "v"), so the role can diff it against the pin and stay idempotent
+#
+# Versions themselves live in inventory/group_vars/all.yml so there is exactly
+# one place to bump them.
+
+toolchain:
+  - name: terraform
+    version: "{{ terraform_version }}"
+    kind: zip
+    url: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_linux_amd64.zip"
+    probe: "terraform version -json | jq -r .terraform_version"
+
+  - name: kops
+    version: "{{ kops_version }}"
+    kind: binary
+    url: "https://github.com/kubernetes/kops/releases/download/v{{ kops_version }}/kops-linux-amd64"
+    probe: "kops version --short | sed 's/^v//'"
+
+  - name: kubectl
+    version: "{{ kubectl_version }}"
+    kind: binary
+    url: "https://dl.k8s.io/release/v{{ kubectl_version }}/bin/linux/amd64/kubectl"
+    probe: "kubectl version --client -o json | jq -r .clientVersion.gitVersion | sed 's/^v//'"
+
+  - name: helm
+    version: "{{ helm_version }}"
+    kind: tar
+    url: "https://get.helm.sh/helm-v{{ helm_version }}-linux-amd64.tar.gz"
+    archive_path: "linux-amd64/helm"
+    probe: "helm version --short | sed -E 's/^v([0-9.]+).*/\\1/'"
+
+  - name: argocd
+    version: "{{ argocd_version }}"
+    kind: binary
+    url: "https://github.com/argoproj/argo-cd/releases/download/v{{ argocd_version }}/argocd-linux-amd64"
+    probe: "argocd version --client --short | head -1 | sed -E 's/^argocd: v?([0-9.]+).*/\\1/'"
+
+  - name: yq
+    version: "{{ yq_version }}"
+    kind: binary
+    url: "https://github.com/mikefarah/yq/releases/download/v{{ yq_version }}/yq_linux_amd64"
+    probe: "yq --version | sed -E 's/.* v?([0-9.]+)$/\\1/'"
+
+  - name: kubeconform
+    version: "{{ kubeconform_version }}"
+    kind: tar
+    url: "https://github.com/yannh/kubeconform/releases/download/v{{ kubeconform_version }}/kubeconform-linux-amd64.tar.gz"
+    archive_path: "kubeconform"
+    probe: "kubeconform -v | sed 's/^v//'"
+
+  - name: tflint
+    version: "{{ tflint_version }}"
+    kind: zip
+    url: "https://github.com/terraform-linters/tflint/releases/download/v{{ tflint_version }}/tflint_linux_amd64.zip"
+    probe: "tflint --version | head -1 | sed -E 's/.*version ([0-9.]+).*/\\1/'"

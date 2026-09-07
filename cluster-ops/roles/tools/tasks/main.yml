@@ -1,0 +1,134 @@
+---
+# Installs the pinned operator toolchain. Idempotent: each tool reports its
+# version first and is only downloaded when the installed version differs from
+# the pin, so re-running the playbook is a no-op.
+
+- name: Ensure install directory exists
+  ansible.builtin.file:
+    path: "{{ install_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Create scratch download directory
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: toolchain
+  register: tools_tmp
+  changed_when: false
+
+- name: Detect currently installed versions
+  ansible.builtin.shell: "{{ item.probe }}"
+  args:
+    executable: /bin/bash
+  loop: "{{ toolchain }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: tools_installed
+  changed_when: false
+  failed_when: false
+
+- name: Build map of installed versions
+  ansible.builtin.set_fact:
+    tools_current: >-
+      {{ dict(toolchain | map(attribute='name') | zip(
+           tools_installed.results | map(attribute='stdout') | map('trim')
+         )) }}
+
+- name: Report toolchain drift
+  ansible.builtin.debug:
+    msg: >-
+      {{ item.name }}: installed={{ tools_current[item.name] | default('absent') or 'absent' }}
+      desired={{ item.version }}
+      {{ '(ok)' if tools_current[item.name] == item.version else '-> WILL INSTALL' }}
+  loop: "{{ toolchain }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+# --- Plain single-binary downloads -------------------------------------------
+
+- name: Install single-binary tools
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "{{ install_dir }}/{{ item.name }}"
+    mode: "0755"
+    force: true
+    timeout: 120
+  loop: "{{ toolchain | selectattr('kind', 'equalto', 'binary') | list }}"
+  loop_control:
+    label: "{{ item.name }} {{ item.version }}"
+  when: tools_current[item.name] | default('') != item.version
+  retries: 3
+  delay: 5
+  register: dl_binary
+  until: dl_binary is succeeded
+
+# --- Zip archives (terraform, tflint) ----------------------------------------
+
+- name: Install zip-packaged tools
+  ansible.builtin.unarchive:
+    src: "{{ item.url }}"
+    dest: "{{ install_dir }}"
+    remote_src: true
+    mode: "0755"
+    extra_opts: ["-o"]
+  loop: "{{ toolchain | selectattr('kind', 'equalto', 'zip') | list }}"
+  loop_control:
+    label: "{{ item.name }} {{ item.version }}"
+  when: tools_current[item.name] | default('') != item.version
+
+# --- Tarballs with a nested path (helm, kubeconform) -------------------------
+
+- name: Extract tarball-packaged tools
+  ansible.builtin.unarchive:
+    src: "{{ item.url }}"
+    dest: "{{ tools_tmp.path }}"
+    remote_src: true
+  loop: "{{ toolchain | selectattr('kind', 'equalto', 'tar') | list }}"
+  loop_control:
+    label: "{{ item.name }} {{ item.version }}"
+  when: tools_current[item.name] | default('') != item.version
+
+- name: Place tarball binaries on PATH
+  ansible.builtin.copy:
+    src: "{{ tools_tmp.path }}/{{ item.archive_path }}"
+    dest: "{{ install_dir }}/{{ item.name }}"
+    mode: "0755"
+    remote_src: true
+  loop: "{{ toolchain | selectattr('kind', 'equalto', 'tar') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: tools_current[item.name] | default('') != item.version
+
+- name: Remove scratch directory
+  ansible.builtin.file:
+    path: "{{ tools_tmp.path }}"
+    state: absent
+  changed_when: false
+
+# --- Verification -------------------------------------------------------------
+
+- name: Re-probe every tool
+  ansible.builtin.shell: "{{ item.probe }}"
+  args:
+    executable: /bin/bash
+  loop: "{{ toolchain }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: tools_verify
+  changed_when: false
+
+- name: Fail if any tool is not at its pinned version
+  ansible.builtin.assert:
+    that:
+      - item.0.stdout | trim == item.1.version
+    fail_msg: >-
+      {{ item.1.name }} reports '{{ item.0.stdout | trim }}'
+      but the pin is '{{ item.1.version }}'
+    success_msg: "{{ item.1.name }} {{ item.1.version }} verified"
+  loop: "{{ tools_verify.results | zip(toolchain) | list }}"
+  loop_control:
+    label: "{{ item.1.name }}"
+
+- name: Toolchain summary
+  ansible.builtin.debug:
+    msg: "{{ toolchain | map(attribute='name') | zip(toolchain | map(attribute='version')) | map('join', ' ') | list }}"

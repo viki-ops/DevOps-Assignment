@@ -1,0 +1,66 @@
+# ---------------------------------------------------------------------------
+# Secrets - nothing matching these may ever reach a commit.
+# ---------------------------------------------------------------------------
+*.pem
+*.key
+!**/testdata/*.key
+*.p12
+*.pfx
+.env
+.envrc
+*credentials*
+!**/aws-credentials.md
+.git-credentials
+kubeconfig
+kubeconfig-*
+*.kubeconfig
+id_rsa*
+id_ed25519*
+secrets.yaml
+secrets.yml
+*-secret.yaml
+!**/sealed-secret*.yaml
+
+# ---------------------------------------------------------------------------
+# Terraform
+# ---------------------------------------------------------------------------
+.terraform/
+.terraform.lock.hcl.bak
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# ---------------------------------------------------------------------------
+# Helm
+# ---------------------------------------------------------------------------
+charts/*.tgz
+**/charts/*.tgz
+**/Chart.lock
+.helm-render/
+
+# ---------------------------------------------------------------------------
+# Ansible
+# ---------------------------------------------------------------------------
+*.retry
+.ansible/
+cluster-ops/build/
+
+# ---------------------------------------------------------------------------
+# Local scratch
+# ---------------------------------------------------------------------------
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
+tmp/
+scratch/
