@@ -1,0 +1,29 @@
+# Dev overrides for checkout.
+replicaCount: 2
+
+image:
+  repository: public.ecr.aws/aws-containers/retail-store-sample-checkout
+  digest: sha256:0f61ae23ef14e2df6170edf31b14bf1f1e5bd569b9bdf49afc69505e0c776a28
+  tag: "1.6.2-amd64"
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+nodeSelector:
+  lifecycle: spot

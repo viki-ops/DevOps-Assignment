@@ -65,3 +65,4 @@ cluster-ops/build/
 tmp/
 scratch/
 cluster-ops/build/
+apps/retail-store-sample-app/

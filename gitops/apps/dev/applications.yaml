@@ -1,0 +1,165 @@
+# Wave 2: application workloads. Depends on platform (ingress, DNS, policies).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: retail-ui
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: dev
+  sources:
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      path: apps/charts/ui
+      helm:
+        valueFiles:
+          - $values/gitops/values/apps/dev/ui.yaml
+        releaseName: ui
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: retail-store-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: retail-catalog
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: dev
+  sources:
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      path: apps/charts/catalog
+      helm:
+        valueFiles:
+          - $values/gitops/values/apps/dev/catalog.yaml
+        releaseName: catalog
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: retail-store-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: retail-cart
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: dev
+  sources:
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      path: apps/charts/cart
+      helm:
+        valueFiles:
+          - $values/gitops/values/apps/dev/cart.yaml
+        releaseName: cart
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: retail-store-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: retail-checkout
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: dev
+  sources:
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      path: apps/charts/checkout
+      helm:
+        valueFiles:
+          - $values/gitops/values/apps/dev/checkout.yaml
+        releaseName: checkout
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: retail-store-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: retail-orders
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: dev
+  sources:
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      path: apps/charts/orders
+      helm:
+        valueFiles:
+          - $values/gitops/values/apps/dev/orders.yaml
+        releaseName: orders
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: retail-store-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

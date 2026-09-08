@@ -1,0 +1,29 @@
+# Dev overrides for orders.
+replicaCount: 2
+
+image:
+  repository: public.ecr.aws/aws-containers/retail-store-sample-orders
+  digest: sha256:83d29f18d3b5a4795136873756bc29f910700ef7b60f07771506c579204e0bea
+  tag: "1.6.2-amd64"
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+nodeSelector:
+  lifecycle: spot
