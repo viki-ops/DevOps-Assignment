@@ -1,45 +1,43 @@
 controller:
-  # NLB for the storefront. internet-facing so the assignment can be demoed
-  # from a browser without a SOCKS tunnel; the private zone still proves
-  # external-dns + IRSA separately.
   service:
     type: LoadBalancer
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
       service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
-      # Tag so teardown leak-checks can find it.
       service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "Project=platform,Environment=dev,ManagedBy=ingress-nginx"
 
-  # Platform controllers stay on on-demand capacity.
   nodeSelector:
     lifecycle: on-demand
 
+  # CPU limit included so the Kyverno require-resource-limits policy admits
+  # these pods. Memory is the meaningful bound; CPU is set high enough not to
+  # throttle under normal load.
   resources:
     requests:
       cpu: 100m
       memory: 128Mi
     limits:
+      cpu: "1"
       memory: 512Mi
 
   metrics:
     enabled: true
     serviceMonitor:
-      enabled: false   # flipped on once kube-prometheus-stack CRDs exist
+      enabled: false
 
-  # Two replicas + PDB so a node drain does not take ingress offline.
   replicaCount: 2
   minAvailable: 1
-
   allowSnippetAnnotations: false
 
   config:
-    # Sensible defaults for a retail storefront.
     use-forwarded-headers: "true"
     compute-full-forwarded-for: "true"
     proxy-body-size: "8m"
 
+# Disabled: enabling it makes the controller look for a Service named
+# ingress-nginx-defaultbackend before the chart has finished creating it,
+# which races into CrashLoopBackOff. A custom default backend can be added
+# later as a separate Application if we want branded 404s.
 defaultBackend:
-  enabled: true
-  nodeSelector:
-    lifecycle: on-demand
+  enabled: false

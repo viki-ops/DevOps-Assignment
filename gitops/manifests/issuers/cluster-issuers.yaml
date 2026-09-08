@@ -2,12 +2,15 @@
 # Public ACME is deliberately not used: corp.example.internal is not a
 # publicly resolvable domain, so Let's Encrypt DNS-01 would never complete.
 # See docs/adr/0002-dns-topology.md.
+#
+# Namespace note: kOps installs cert-manager into kube-system (not the
+# conventional cert-manager namespace). A ClusterIssuer's CA secret must live
+# in the same namespace as the controller, so the Certificate below targets
+# kube-system.
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: selfsigned-root
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
 spec:
   selfSigned: {}
 ---
@@ -15,7 +18,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: platform-ca
-  namespace: cert-manager
+  namespace: kube-system
 spec:
   isCA: true
   commonName: platform-dev-ca
@@ -32,8 +35,6 @@ apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: platform-ca
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
 spec:
   ca:
     secretName: platform-ca

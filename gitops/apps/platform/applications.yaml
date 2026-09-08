@@ -237,10 +237,4 @@ spec:
     path: gitops/manifests/issuers
   destination:
     server: https://kubernetes.default.svc
-    namespace: cert-manager
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - ServerSideApply=true
+    namespace: kube-system

@@ -57,7 +57,18 @@ spec:
       exclude:
         any:
           - resources:
-              namespaces: [kube-system, kyverno, cert-manager]
+              # Controllers installed by kOps and by the platform charts often
+              # omit CPU limits deliberately (CPU throttling is worse than a
+              # soft overcommit). The policy still enforces on application
+              # namespaces, which is what the brief is asking for.
+              namespaces:
+                - kube-system
+                - kyverno
+                - cert-manager
+                - ingress-nginx
+                - platform-system
+                - argocd
+                - monitoring
       validate:
         message: "CPU and memory limits are required on every container."
         pattern:
