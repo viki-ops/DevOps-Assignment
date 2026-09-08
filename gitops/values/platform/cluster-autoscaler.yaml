@@ -1,0 +1,41 @@
+# Top-level keys match the autoscaler chart schema (not nested under
+# clusterAutoscaler: - that was the old stable/ chart layout).
+
+image:
+  # Must match the cluster minor (ADR 0001 pins 1.34.x). Chart 9.53.0
+  # defaults to 1.34.2; pin explicitly so a chart bump cannot float us.
+  tag: v1.34.2
+
+autoDiscovery:
+  clusterName: dev.k8s.local
+
+awsRegion: eu-north-1
+cloudProvider: aws
+
+rbac:
+  create: true
+  serviceAccount:
+    create: true
+    name: cluster-autoscaler
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::125788629837:role/platform-dev-cluster-autoscaler
+
+extraArgs:
+  balance-similar-node-groups: "true"
+  skip-nodes-with-system-pods: "false"
+  skip-nodes-with-local-storage: "false"
+  expander: least-waste
+  scale-down-delay-after-add: 10m
+  scale-down-unneeded-time: 10m
+
+nodeSelector:
+  lifecycle: on-demand
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 300Mi
+  limits:
+    memory: 600Mi
+
+replicaCount: 2

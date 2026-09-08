@@ -1,0 +1,45 @@
+# Manages A/TXT records in the private hosted zone. Proof of IRSA.
+# Evidence: aws route53 list-resource-record-sets --hosted-zone-id Z10227831KOYKCH0ZZF41
+
+provider:
+  name: aws
+
+env:
+  - name: AWS_DEFAULT_REGION
+    value: eu-north-1
+
+serviceAccount:
+  create: true
+  name: external-dns
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::125788629837:role/platform-dev-external-dns
+
+# Only touch the zone we own. Without domainFilters, external-dns would try to
+# manage every zone the IAM role can see - which, if the policy were ever
+# widened, would be every zone in the account.
+domainFilters:
+  - corp.example.internal
+
+# upsert-only: never delete a record it did not create. Safer for a shared
+# private zone that may also hold manually curated entries.
+policy: upsert-only
+
+# Ownership TXT prefix so two clusters sharing a zone would not fight.
+txtOwnerId: platform-dev
+txtPrefix: external-dns-
+
+sources:
+  - service
+  - ingress
+
+interval: 1m
+
+nodeSelector:
+  lifecycle: on-demand
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 128Mi

@@ -1,0 +1,27 @@
+clusterName: dev.k8s.local
+region: eu-north-1
+vpcId: vpc-0f9f899fb457031b8
+
+serviceAccount:
+  create: true
+  name: aws-load-balancer-controller
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::125788629837:role/platform-dev-aws-lbc
+
+# kOps (not EKS). Without this the controller looks for the EKS-specific
+# cluster tag shape and fails to discover subnets / security groups.
+enableShield: false
+enableWaf: false
+enableWafv2: false
+
+nodeSelector:
+  lifecycle: on-demand
+
+replicaCount: 2
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 512Mi

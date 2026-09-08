@@ -1,0 +1,36 @@
+# Admission policies only - reports and enforces the three brief-required
+# guardrails. Background scanning is enabled so existing violations surface
+# without waiting for a recreate.
+admissionController:
+  replicas: 2
+  nodeSelector:
+    lifecycle: on-demand
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+backgroundController:
+  nodeSelector:
+    lifecycle: on-demand
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+
+cleanupController:
+  nodeSelector:
+    lifecycle: on-demand
+
+reportsController:
+  nodeSelector:
+    lifecycle: on-demand
+
+# CRDs are installed by the chart; ClusterPolicies live in
+# gitops/apps/platform/policies/ and sync after this Application.
+crds:
+  install: true

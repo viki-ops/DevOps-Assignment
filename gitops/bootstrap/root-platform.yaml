@@ -1,0 +1,38 @@
+# =============================================================================
+# Root Application: platform
+#
+# Applied once (kubectl apply -f) during bootstrap. From then on ArgoCD owns
+# every child Application under gitops/apps/platform/.
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-platform
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: platform
+
+  source:
+    repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+    targetRevision: main
+    path: gitops/apps/platform
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
