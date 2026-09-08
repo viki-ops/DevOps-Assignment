@@ -1,0 +1,4 @@
+NAME                      ADMISSION   BACKGROUND   READY   AGE   MESSAGE
+disallow-latest-tag       true        true         True    13m   Ready
+disallow-privileged       true        true         True    13m   Ready
+require-resource-limits   true        true         True    13m   Ready

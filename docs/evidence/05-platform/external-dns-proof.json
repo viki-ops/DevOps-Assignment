@@ -1,0 +1,40 @@
+[
+    {
+        "Name": "external-dns-aaaa-proof.corp.example.internal.",
+        "Type": "TXT",
+        "TTL": 300,
+        "ResourceRecords": [
+            {
+                "Value": "\"heritage=external-dns,external-dns/owner=platform-dev,external-dns/resource=ingress/platform-proof/dns-proof\""
+            }
+        ]
+    },
+    {
+        "Name": "external-dns-cname-proof.corp.example.internal.",
+        "Type": "TXT",
+        "TTL": 300,
+        "ResourceRecords": [
+            {
+                "Value": "\"heritage=external-dns,external-dns/owner=platform-dev,external-dns/resource=ingress/platform-proof/dns-proof\""
+            }
+        ]
+    },
+    {
+        "Name": "proof.corp.example.internal.",
+        "Type": "A",
+        "AliasTarget": {
+            "HostedZoneId": "Z1UDT6IFJ4EJM",
+            "DNSName": "k8s-ingressn-ingressn-0097caa2ee-380827f08f31d201.elb.eu-north-1.amazonaws.com.",
+            "EvaluateTargetHealth": true
+        }
+    },
+    {
+        "Name": "proof.corp.example.internal.",
+        "Type": "AAAA",
+        "AliasTarget": {
+            "HostedZoneId": "Z1UDT6IFJ4EJM",
+            "DNSName": "k8s-ingressn-ingressn-0097caa2ee-380827f08f31d201.elb.eu-north-1.amazonaws.com.",
+            "EvaluateTargetHealth": true
+        }
+    }
+]

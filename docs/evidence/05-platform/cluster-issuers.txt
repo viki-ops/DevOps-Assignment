@@ -1,0 +1,3 @@
+NAME              READY   AGE
+platform-ca       True    4m19s
+selfsigned-root   True    15m

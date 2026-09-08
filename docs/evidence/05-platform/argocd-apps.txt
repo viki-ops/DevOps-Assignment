@@ -1,0 +1,10 @@
+NAME                           SYNC STATUS   HEALTH STATUS   REVISION                                   PROJECT
+aws-load-balancer-controller   Synced        Healthy                                                    platform
+cluster-autoscaler             Synced        Healthy                                                    platform
+cluster-issuers                Synced        Healthy         5183ecdb02862bad348a472599c595036e32c307   platform
+external-dns                   Synced        Healthy                                                    platform
+external-secrets               Synced        Healthy                                                    platform
+ingress-nginx                  Synced        Healthy                                                    platform
+kyverno                        OutOfSync     Healthy                                                    platform
+kyverno-policies               OutOfSync     Healthy         5183ecdb02862bad348a472599c595036e32c307   platform
+root-platform                  Synced        Healthy         5183ecdb02862bad348a472599c595036e32c307   platform
