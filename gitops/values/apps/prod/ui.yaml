@@ -43,7 +43,7 @@ ingress:
 
 app:
   endpoints:
-    catalog: http://catalog.retail-store-dev.svc.cluster.local:80
-    carts: http://cart.retail-store-dev.svc.cluster.local:80
-    orders: http://orders.retail-store-dev.svc.cluster.local:80
-    checkout: http://checkout.retail-store-dev.svc.cluster.local:80
+    catalog: http://catalog.retail-store-prod.svc.cluster.local:80
+    carts: http://cart-carts.retail-store-prod.svc.cluster.local:80
+    orders: http://orders.retail-store-prod.svc.cluster.local:80
+    checkout: http://checkout.retail-store-prod.svc.cluster.local:80
