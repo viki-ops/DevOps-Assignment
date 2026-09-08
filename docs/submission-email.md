@@ -51,5 +51,8 @@ Details: README → “Access the storefront (and Grafana)”.
 
 Happy to walk through a live demo or answer any questions.
 
+I will destroy the cluster and related AWS services (kOps + Terraform) after the
+walkthrough so ongoing cloud spend is stopped.
+
 Thanks,
 Vignesh
