@@ -237,4 +237,66 @@ spec:
     path: gitops/manifests/issuers
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: kube-system---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: platform
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: 72.9.1
+      helm:
+        valueFiles:
+          - $values/gitops/values/platform/kube-prometheus-stack.yaml
+        releaseName: kube-prometheus-stack
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      # CRDs are large; replace avoids annotation-size limits on update.
+      - Replace=true
+---
+# Dashboards + SLO rules. Wave 2 so the PrometheusRule / ServiceMonitor CRDs
+# exist before these manifests are applied.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: observability-config
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: platform
+  source:
+    repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+    targetRevision: main
+    path: gitops/manifests/observability
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

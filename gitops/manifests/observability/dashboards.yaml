@@ -1,0 +1,186 @@
+# Grafana dashboards as ConfigMaps. The grafana sidecar loads any ConfigMap
+# labelled grafana_dashboard=1.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-retail-overview
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  retail-overview.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "title": "Request rate (req/s)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "expr": "sum(rate(nginx_ingress_controller_requests{ingress=\"ui\",exported_namespace=\"retail-store-dev\"}[5m]))",
+              "legendFormat": "total"
+            },
+            {
+              "expr": "sum(rate(nginx_ingress_controller_requests{ingress=\"ui\",exported_namespace=\"retail-store-dev\",status=~\"5..\"}[5m]))",
+              "legendFormat": "5xx"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] }
+        },
+        {
+          "title": "Availability (5m)",
+          "type": "stat",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "expr": "retail:sli:availability:ratio5m",
+              "legendFormat": "availability"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "yellow", "value": 0.995 },
+                  { "color": "green", "value": 0.999 }
+                ]
+              },
+              "min": 0.9,
+              "max": 1
+            },
+            "overrides": []
+          }
+        },
+        {
+          "title": "Error rate %",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "expr": "sum(rate(nginx_ingress_controller_requests{ingress=\"ui\",exported_namespace=\"retail-store-dev\",status=~\"5..\"}[5m])) / clamp_min(sum(rate(nginx_ingress_controller_requests{ingress=\"ui\",exported_namespace=\"retail-store-dev\"}[5m])), 1e-9)",
+              "legendFormat": "5xx ratio"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "percentunit" }, "overrides": [] }
+        },
+        {
+          "title": "p50 / p95 / p99 latency",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.50, sum(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress=\"ui\",exported_namespace=\"retail-store-dev\"}[5m])) by (le))",
+              "legendFormat": "p50"
+            },
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress=\"ui\",exported_namespace=\"retail-store-dev\"}[5m])) by (le))",
+              "legendFormat": "p95"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress=\"ui\",exported_namespace=\"retail-store-dev\"}[5m])) by (le))",
+              "legendFormat": "p99"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] }
+        },
+        {
+          "title": "HPA replicas vs CPU",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "expr": "kube_horizontalpodautoscaler_status_current_replicas{namespace=\"retail-store-dev\"}",
+              "legendFormat": "{{ horizontalpodautoscaler }} replicas"
+            },
+            {
+              "expr": "kube_horizontalpodautoscaler_spec_max_replicas{namespace=\"retail-store-dev\"}",
+              "legendFormat": "{{ horizontalpodautoscaler }} max"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] }
+        }
+      ],
+      "schemaVersion": 39,
+      "tags": ["retail", "slo"],
+      "templating": { "list": [] },
+      "time": { "from": "now-1h", "to": "now" },
+      "title": "Retail storefront overview",
+      "uid": "retail-overview",
+      "version": 1
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-hpa-detail
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  hpa-detail.json: |
+    {
+      "editable": true,
+      "panels": [
+        {
+          "title": "Current vs desired replicas",
+          "type": "timeseries",
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "expr": "kube_horizontalpodautoscaler_status_current_replicas{namespace=\"retail-store-dev\"}",
+              "legendFormat": "{{ horizontalpodautoscaler }} current"
+            },
+            {
+              "expr": "kube_horizontalpodautoscaler_status_desired_replicas{namespace=\"retail-store-dev\"}",
+              "legendFormat": "{{ horizontalpodautoscaler }} desired"
+            }
+          ]
+        },
+        {
+          "title": "Pod CPU throttling",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 10 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "expr": "sum(rate(container_cpu_cfs_throttled_seconds_total{namespace=\"retail-store-dev\"}[5m])) by (pod)",
+              "legendFormat": "{{ pod }}"
+            }
+          ]
+        },
+        {
+          "title": "Pod memory working set",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 10 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "expr": "sum(container_memory_working_set_bytes{namespace=\"retail-store-dev\",container!=\"\"}) by (pod)",
+              "legendFormat": "{{ pod }}"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] }
+        }
+      ],
+      "schemaVersion": 39,
+      "tags": ["retail", "hpa"],
+      "time": { "from": "now-1h", "to": "now" },
+      "title": "Retail HPA detail",
+      "uid": "retail-hpa",
+      "version": 1
+    }

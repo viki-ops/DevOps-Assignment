@@ -1,0 +1,134 @@
+# kube-prometheus-stack for the platform.
+# Chart 72.9.1 (prometheus-operator v0.82.x) - pinned in _pins.yaml.
+
+fullname: monitoring
+
+prometheusOperator:
+  nodeSelector:
+    lifecycle: on-demand
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+prometheus:
+  prometheusSpec:
+    retention: 7d
+    # Keep Prometheus off spot so a reclamation does not wipe the scrape
+    # window we use for SLO burn-rate evidence.
+    nodeSelector:
+      lifecycle: on-demand
+    resources:
+      requests:
+        cpu: 250m
+        memory: 1Gi
+      limits:
+        cpu: "2"
+        memory: 2Gi
+    # Discover ServiceMonitors / PodMonitors in every namespace. Without this
+    # only the monitoring namespace is scraped and the retail apps are invisible.
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+
+alertmanager:
+  alertmanagerSpec:
+    nodeSelector:
+      lifecycle: on-demand
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+
+grafana:
+  enabled: true
+  adminPassword: "platform-dev-grafana"   # rotated after demo; not a real secret store
+  nodeSelector:
+    lifecycle: on-demand
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+  # Sidecar picks up ConfigMaps labelled grafana_dashboard=1 from any namespace.
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL
+    datasources:
+      enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - grafana.corp.example.internal
+    tls:
+      - secretName: grafana-tls
+        hosts:
+          - grafana.corp.example.internal
+    annotations:
+      cert-manager.io/cluster-issuer: platform-ca
+
+# Default rules cover kubelet / apiserver / node. Application SLOs live in
+# gitops/manifests/observability/ as PrometheusRules synced separately so we
+# can iterate without re-rendering the whole stack.
+defaultRules:
+  create: true
+  rules:
+    alertmanager: true
+    etcd: false          # etcd is on the control plane; we scrape via kOps metrics later if needed
+    configReloaders: true
+    general: true
+    k8sContainerCpuUsageSecondsTotal: true
+    k8sContainerMemoryWorkingSetBytes: true
+    k8sContainerOomKiller: true
+    k8sPodOwner: true
+    kubeApiserverAvailability: true
+    kubeApiserverBurnrate: true
+    kubeApiserverHistogram: true
+    kubeApiserverSlos: true
+    kubeControllerManager: false
+    kubeProxy: false
+    kubeSchedulerAlerting: false
+    kubeStateMetrics: true
+    kubelet: true
+    kubernetesApps: true
+    kubernetesResources: true
+    kubernetesStorage: true
+    kubernetesSystem: true
+    network: true
+    node: true
+    nodeExporterAlerting: true
+    nodeExporterRecording: true
+    prometheus: true
+    prometheusOperator: true
+
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true

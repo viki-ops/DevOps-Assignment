@@ -24,7 +24,9 @@ controller:
   metrics:
     enabled: true
     serviceMonitor:
-      enabled: false
+      enabled: true
+      additionalLabels:
+        release: kube-prometheus-stack
 
   replicaCount: 2
   minAvailable: 1

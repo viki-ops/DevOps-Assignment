@@ -1,0 +1,104 @@
+# =============================================================================
+# Retail storefront SLO: 99.5% availability over a rolling window.
+#
+# Availability = 1 - (5xx / total requests) on the ingress-nginx controller
+# for host store.corp.example.internal.
+#
+# Multi-window, multi-burn-rate alerts (Google SRE workbook ch. 5):
+#   - Fast burn:  14.4x over 5m / 1h  -> page (would exhaust monthly budget in ~2d)
+#   - Slow burn:   6x over 30m / 6h   -> ticket
+#
+# Error budget for 99.5% over 30d ~= 3.6h. A 14.4x burn drains that in ~2.5h.
+# =============================================================================
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: retail-storefront-slo
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+    app.kubernetes.io/part-of: platform
+spec:
+  groups:
+    - name: retail-storefront.slo
+      rules:
+        # Recording rules keep the burn-rate expressions readable and make the
+        # same ratios available on the Grafana dashboard.
+        - record: retail:sli:requests:rate5m
+          expr: |
+            sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev"}[5m]))
+
+        - record: retail:sli:errors:rate5m
+          expr: |
+            sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[5m]))
+
+        - record: retail:sli:availability:ratio5m
+          expr: |
+            1 - (
+              clamp_min(retail:sli:errors:rate5m, 0)
+              /
+              clamp_min(retail:sli:requests:rate5m, 1e-9)
+            )
+
+        - record: retail:sli:availability:ratio1h
+          expr: |
+            1 - (
+              sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[1h]))
+              /
+              clamp_min(sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev"}[1h])), 1e-9)
+            )
+
+        - record: retail:sli:availability:ratio6h
+          expr: |
+            1 - (
+              sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[6h]))
+              /
+              clamp_min(sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev"}[6h])), 1e-9)
+            )
+
+        # Fast burn: 14.4x over both 5m and 1h windows.
+        # Threshold = 1 - (14.4 * 0.005) = 0.928
+        - alert: RetailStorefrontErrorBudgetFastBurn
+          expr: |
+            (
+              retail:sli:availability:ratio5m < (1 - 14.4 * 0.005)
+              and
+              retail:sli:availability:ratio1h < (1 - 14.4 * 0.005)
+            )
+          for: 2m
+          labels:
+            severity: critical
+            slo: "99.5"
+            service: retail-storefront
+          annotations:
+            summary: "Retail storefront is burning error budget fast"
+            description: >-
+              5m availability {{ $value | humanizePercentage }} is below the
+              14.4x burn threshold (92.8%) for the 99.5% SLO. At this rate the
+              30-day error budget would be exhausted in ~2.5 hours.
+
+        # Slow burn: 6x over both 30m and 6h windows.
+        # Threshold = 1 - (6 * 0.005) = 0.97
+        - alert: RetailStorefrontErrorBudgetSlowBurn
+          expr: |
+            (
+              (
+                1 - (
+                  sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[30m]))
+                  /
+                  clamp_min(sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev"}[30m])), 1e-9)
+                )
+              ) < (1 - 6 * 0.005)
+              and
+              retail:sli:availability:ratio6h < (1 - 6 * 0.005)
+            )
+          for: 15m
+          labels:
+            severity: warning
+            slo: "99.5"
+            service: retail-storefront
+          annotations:
+            summary: "Retail storefront is burning error budget slowly"
+            description: >-
+              Sustained elevated 5xx rate against the 99.5% SLO. Investigate
+              before the monthly error budget is consumed.
