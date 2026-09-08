@@ -140,6 +140,7 @@ kubectl apply -f gitops/projects/ -f gitops/bootstrap/
 
 | Doc | Link |
 |-----|------|
+| Interview mock Q&A | [`docs/interview-mock-qa.md`](docs/interview-mock-qa.md) |
 | ADRs | [`docs/adr/`](docs/adr/) |
 | Promotion runbook | [`docs/runbooks/promotion.md`](docs/runbooks/promotion.md) |
 | Teardown runbook | [`docs/runbooks/teardown.md`](docs/runbooks/teardown.md) |
