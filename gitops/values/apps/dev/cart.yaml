@@ -24,6 +24,7 @@ autoscaling:
 podDisruptionBudget:
   enabled: true
   minAvailable: 1
+  maxUnavailable: null
 
 nodeSelector:
   lifecycle: spot
