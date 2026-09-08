@@ -1,0 +1,6 @@
+retail-cart-prod               OutOfSync     Missing
+retail-catalog-prod            OutOfSync     Missing
+retail-checkout-prod           OutOfSync     Missing
+retail-orders-prod             OutOfSync     Missing
+retail-ui-prod                 OutOfSync     Missing
+root-prod                      Synced        Healthy

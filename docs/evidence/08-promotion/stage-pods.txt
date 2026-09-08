@@ -1,0 +1,11 @@
+NAME                         READY   STATUS    RESTARTS   AGE     IP              NODE                  NOMINATED NODE   READINESS GATES
+cart-carts-c68f75bd7-5tg6x   1/1     Running   0          2m13s   100.96.13.54    i-062ac2b0be69f87a2   <none>           <none>
+cart-carts-c68f75bd7-dcmjc   1/1     Running   0          2m28s   100.96.13.4     i-062ac2b0be69f87a2   <none>           <none>
+catalog-867cc5f9b8-njqmr     1/1     Running   0          2m29s   100.96.13.109   i-062ac2b0be69f87a2   <none>           <none>
+catalog-867cc5f9b8-t4bzd     1/1     Running   0          2m14s   100.96.6.31     i-01820d54d420c687a   <none>           <none>
+checkout-6975579b8f-p9q7z    1/1     Running   0          2m26s   100.96.13.51    i-062ac2b0be69f87a2   <none>           <none>
+checkout-6975579b8f-rmbdd    1/1     Running   0          2m11s   100.96.13.55    i-062ac2b0be69f87a2   <none>           <none>
+orders-997568548-64sgt       1/1     Running   0          2m24s   100.96.13.189   i-062ac2b0be69f87a2   <none>           <none>
+orders-997568548-k2q2t       1/1     Running   0          2m9s    100.96.13.2     i-062ac2b0be69f87a2   <none>           <none>
+ui-7dfc898dd7-rtwdx          1/1     Running   0          2m33s   100.96.13.39    i-062ac2b0be69f87a2   <none>           <none>
+ui-7dfc898dd7-wgtm4          1/1     Running   0          2m18s   100.96.1.231    i-0ddc3dbfde4ced571   <none>           <none>

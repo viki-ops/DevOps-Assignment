@@ -1,0 +1,6 @@
+retail-cart-stage              Synced        Degraded
+retail-catalog-stage           Synced        Healthy
+retail-checkout-stage          Synced        Healthy
+retail-orders-stage            Synced        Degraded
+retail-ui-stage                OutOfSync     Healthy
+root-stage                     Synced        Healthy
