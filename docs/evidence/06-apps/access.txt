@@ -1,0 +1,2 @@
+NLB=k8s-ingressn-ingressn-0097caa2ee-380827f08f31d201.elb.eu-north-1.amazonaws.com
+curl -k -H 'Host: store.corp.example.internal' https://$NLB/

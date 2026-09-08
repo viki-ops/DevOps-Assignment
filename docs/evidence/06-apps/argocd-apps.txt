@@ -1,0 +1,16 @@
+NAME                           SYNC STATUS   HEALTH STATUS
+aws-load-balancer-controller   Synced        Healthy
+cluster-autoscaler             Synced        Healthy
+cluster-issuers                Synced        Healthy
+external-dns                   Synced        Healthy
+external-secrets               Synced        Healthy
+ingress-nginx                  Synced        Healthy
+kyverno                        OutOfSync     Healthy
+kyverno-policies               OutOfSync     Healthy
+retail-cart                    Synced        Healthy
+retail-catalog                 Synced        Healthy
+retail-checkout                Synced        Healthy
+retail-orders                  Synced        Healthy
+retail-ui                      Synced        Healthy
+root-dev                       Synced        Healthy
+root-platform                  Synced        Healthy

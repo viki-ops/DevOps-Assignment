@@ -1,0 +1,28 @@
+NAME                              READY   STATUS    RESTARTS   AGE     IP             NODE                  NOMINATED NODE   READINESS GATES
+pod/cart-carts-57d9888c48-spvrw   1/1     Running   0          5m40s   100.96.9.11    i-0c0ec45159c9990fc   <none>           <none>
+pod/cart-carts-57d9888c48-whwpc   1/1     Running   0          5m25s   100.96.9.177   i-0c0ec45159c9990fc   <none>           <none>
+pod/catalog-67fc5b9fb9-kgr7v      1/1     Running   0          5m40s   100.96.9.75    i-0c0ec45159c9990fc   <none>           <none>
+pod/catalog-67fc5b9fb9-x2nft      1/1     Running   0          5m25s   100.96.9.32    i-0c0ec45159c9990fc   <none>           <none>
+pod/checkout-8866c7c9d-wk5nv      1/1     Running   0          5m39s   100.96.9.176   i-0c0ec45159c9990fc   <none>           <none>
+pod/checkout-8866c7c9d-xlhvs      1/1     Running   0          5m24s   100.96.9.244   i-0c0ec45159c9990fc   <none>           <none>
+pod/orders-d549fb9cc-c2b5g        1/1     Running   0          5m27s   100.96.9.83    i-0c0ec45159c9990fc   <none>           <none>
+pod/orders-d549fb9cc-cqjgn        1/1     Running   0          5m42s   100.96.9.132   i-0c0ec45159c9990fc   <none>           <none>
+pod/ui-79c76b66d4-5pbs4           1/1     Running   0          5m25s   100.96.9.232   i-0c0ec45159c9990fc   <none>           <none>
+pod/ui-79c76b66d4-lxnkf           1/1     Running   0          5m40s   100.96.9.119   i-0c0ec45159c9990fc   <none>           <none>
+
+NAME                                             REFERENCE               TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/cart-carts   Deployment/cart-carts   cpu: 3%/70%   2         6         2          5m40s
+horizontalpodautoscaler.autoscaling/catalog      Deployment/catalog      cpu: 1%/70%   2         6         2          5m40s
+horizontalpodautoscaler.autoscaling/checkout     Deployment/checkout     cpu: 7%/70%   2         6         2          5m40s
+horizontalpodautoscaler.autoscaling/orders       Deployment/orders       cpu: 2%/70%   2         6         2          5m42s
+horizontalpodautoscaler.autoscaling/ui           Deployment/ui           cpu: 1%/70%   2         6         2          5m40s
+
+NAME                                    MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+poddisruptionbudget.policy/cart-carts   1               N/A               1                     44s
+poddisruptionbudget.policy/catalog      1               N/A               1                     47s
+poddisruptionbudget.policy/checkout     1               N/A               1                     42s
+poddisruptionbudget.policy/orders       1               N/A               1                     39s
+poddisruptionbudget.policy/ui           1               N/A               1                     49s
+
+NAME                           CLASS   HOSTS                         ADDRESS                                                                          PORTS     AGE
+ingress.networking.k8s.io/ui   nginx   store.corp.example.internal   k8s-ingressn-ingressn-0097caa2ee-380827f08f31d201.elb.eu-north-1.amazonaws.com   80, 443   5m41s
