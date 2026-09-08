@@ -1,0 +1,30 @@
+# Dev overrides for cart.
+replicaCount: 2
+
+image:
+  repository: public.ecr.aws/aws-containers/retail-store-sample-cart
+  digest: sha256:dc09b12dd9babd6e67adf344bebe004d3a96bf370dde6e94b60f15143e3cf03a
+  tag: "1.6.2-amd64"
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+  maxUnavailable: null
+
+nodeSelector:
+  lifecycle: on-demand

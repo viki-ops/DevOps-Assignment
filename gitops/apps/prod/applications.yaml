@@ -1,0 +1,154 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: retail-ui-prod
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: prod
+  sources:
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      path: apps/charts/ui
+      helm:
+        valueFiles:
+          - $values/gitops/values/apps/prod/ui.yaml
+        releaseName: ui
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: retail-store-prod
+  # Manual sync is the promotion gate: a merge alone does not deploy.
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: retail-catalog-prod
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: prod
+  sources:
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      path: apps/charts/catalog
+      helm:
+        valueFiles:
+          - $values/gitops/values/apps/prod/catalog.yaml
+        releaseName: catalog
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: retail-store-prod
+  # Manual sync is the promotion gate: a merge alone does not deploy.
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: retail-cart-prod
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: prod
+  sources:
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      path: apps/charts/cart
+      helm:
+        valueFiles:
+          - $values/gitops/values/apps/prod/cart.yaml
+        releaseName: cart
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: retail-store-prod
+  # Manual sync is the promotion gate: a merge alone does not deploy.
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: retail-checkout-prod
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: prod
+  sources:
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      path: apps/charts/checkout
+      helm:
+        valueFiles:
+          - $values/gitops/values/apps/prod/checkout.yaml
+        releaseName: checkout
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: retail-store-prod
+  # Manual sync is the promotion gate: a merge alone does not deploy.
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: retail-orders-prod
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: prod
+  sources:
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      path: apps/charts/orders
+      helm:
+        valueFiles:
+          - $values/gitops/values/apps/prod/orders.yaml
+        releaseName: orders
+    - repoURL: https://github.com/viki-ops/DevOps-Assignment.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: retail-store-prod
+  # Manual sync is the promotion gate: a merge alone does not deploy.
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

@@ -1,0 +1,49 @@
+# Dev overrides for the UI service.
+replicaCount: 2
+
+image:
+  repository: public.ecr.aws/aws-containers/retail-store-sample-ui
+  digest: sha256:a9d5f9ca2a7f4a5c1307159b6f1578546e03161803c52e13eb9a0e1b10a9de3c
+  tag: "1.6.2-amd64"
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 128m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+  maxUnavailable: null
+
+nodeSelector:
+  lifecycle: on-demand
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: platform-ca
+  hosts:
+    - store.corp.example.internal
+  tls:
+    - secretName: store-tls
+      hosts:
+        - store.corp.example.internal
+
+app:
+  endpoints:
+    catalog: http://catalog.retail-store-dev.svc.cluster.local:80
+    carts: http://cart.retail-store-dev.svc.cluster.local:80
+    orders: http://orders.retail-store-dev.svc.cluster.local:80
+    checkout: http://checkout.retail-store-dev.svc.cluster.local:80
