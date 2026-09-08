@@ -24,7 +24,71 @@ Terraform, kOps, Ansible, Helm and ArgoCD.
 - ArgoCD 3.5.2 with platform + retail app-of-apps
 - ingress-nginx NLB, external-dns → `corp.example.internal`, Kyverno guardrails
 - kube-prometheus-stack + 99.5% storefront SLO burn-rate alerts
-- Retail storefront: `store.corp.example.internal` (private DNS) / NLB + Host header publicly
+- Retail storefront: `store.corp.example.internal` (private Route53 zone)
+
+## Access the storefront (and Grafana)
+
+DNS for `*.corp.example.internal` lives in a **private Route53 zone** (VPC-only).
+Your laptop cannot resolve those names unless you map them locally (or are on the VPC).
+
+### 1) Public NLB (ingress-nginx)
+
+```text
+https://k8s-ingressn-ingressn-0097caa2ee-380827f08f31d201.elb.eu-north-1.amazonaws.com/
+```
+
+Opening that URL alone returns nginx **404** — Ingress matches on **Host**, not the ELB name.
+
+Refresh the hostname anytime with:
+
+```bash
+kubectl -n ingress-nginx get svc ingress-nginx-controller \
+  -o jsonpath='{.status.loadBalancer.ingress[0].hostname}{"\n"}'
+```
+
+### 2) Map the private names on your machine (hosts file)
+
+Resolve one NLB IP, then edit hosts:
+
+```bash
+# Linux / macOS
+nslookup k8s-ingressn-ingressn-0097caa2ee-380827f08f31d201.elb.eu-north-1.amazonaws.com
+
+# Windows (PowerShell)
+Resolve-DnsName k8s-ingressn-ingressn-0097caa2ee-380827f08f31d201.elb.eu-north-1.amazonaws.com
+```
+
+Add lines (use any returned A record; NLB IPs can change):
+
+| OS | File |
+|----|------|
+| Windows | `C:\Windows\System32\drivers\etc\hosts` (Notepad as Administrator) |
+| Linux / macOS | `/etc/hosts` (`sudo`) |
+
+```text
+13.61.136.135  store.corp.example.internal
+13.61.136.135  grafana.corp.example.internal
+```
+
+### 3) Open in the browser
+
+| App | URL | Notes |
+|-----|-----|--------|
+| Storefront | https://store.corp.example.internal/home | Accept self-signed cert warning |
+| Grafana | https://grafana.corp.example.internal/ | `admin` / see Grafana secret in cluster |
+
+Browser extensions **cannot** override the `Host` header (Chrome blocks it) — use the hosts-file method above.
+
+### 4) Quick curl check (no hosts file)
+
+```bash
+curl -sk -H "Host: store.corp.example.internal" \
+  https://k8s-ingressn-ingressn-0097caa2ee-380827f08f31d201.elb.eu-north-1.amazonaws.com/home
+```
+
+Expect HTTP **200** and HTML titled `Demo Store`.
+
+Why private DNS + public NLB: see [`docs/adr/0002-dns-topology.md`](docs/adr/0002-dns-topology.md).
 
 ## Quickstart (operator)
 
@@ -81,10 +145,22 @@ kubectl apply -f gitops/projects/ -f gitops/bootstrap/
 | Ingress drift postmortem | [`docs/postmortems/2026-09-08-ingress-drift.md`](docs/postmortems/2026-09-08-ingress-drift.md) |
 | Memory pressure postmortem | [`docs/postmortems/2026-09-08-memory-pressure.md`](docs/postmortems/2026-09-08-memory-pressure.md) |
 
-## Promotion
+## Promotion (dev → stage → prod)
+
+We promote by copying the **same image digest** (`sha256:…`) from
+`gitops/values/apps/dev/` into `stage/` and `prod/` — not by retagging `:latest`.
+That proves what you tested in dev is exactly what stage/prod will run.
+
+| Env | How it deploys |
+|-----|----------------|
+| **dev** | ArgoCD auto-sync |
+| **stage / prod** | Manual Sync only (promotion gate) |
+
+After a promote PR, verify digests match across all three envs:
 
 ```bash
 ./scripts/prove-digest-equality.sh
+# expect: OK for ui, catalog, cart, checkout, orders (same sha256 each)
 ```
 
-dev auto-syncs; stage/prod require manual Sync (see [`docs/runbooks/promotion.md`](docs/runbooks/promotion.md)).
+Full steps: [`docs/runbooks/promotion.md`](docs/runbooks/promotion.md).
