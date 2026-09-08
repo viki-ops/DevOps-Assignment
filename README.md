@@ -142,6 +142,7 @@ kubectl apply -f gitops/projects/ -f gitops/bootstrap/
 |-----|------|
 | ADRs | [`docs/adr/`](docs/adr/) |
 | Promotion runbook | [`docs/runbooks/promotion.md`](docs/runbooks/promotion.md) |
+| Teardown runbook | [`docs/runbooks/teardown.md`](docs/runbooks/teardown.md) |
 | Ingress drift postmortem | [`docs/postmortems/2026-09-08-ingress-drift.md`](docs/postmortems/2026-09-08-ingress-drift.md) |
 | Memory pressure postmortem | [`docs/postmortems/2026-09-08-memory-pressure.md`](docs/postmortems/2026-09-08-memory-pressure.md) |
 
@@ -164,3 +165,24 @@ After a promote PR, verify digests match across all three envs:
 ```
 
 Full steps: [`docs/runbooks/promotion.md`](docs/runbooks/promotion.md).
+
+## Teardown (destroy after walkthrough)
+
+Stop AWS spend once review is done. Full checklist:
+[`docs/runbooks/teardown.md`](docs/runbooks/teardown.md).
+
+```bash
+# 1) kOps cluster (instances, ASGs, API/ingress NLBs, volumes)
+export AWS_REGION=eu-north-1
+export KOPS_STATE_STORE=s3://platform-kops-state-eun1-125788629837
+export NAME=dev.k8s.local
+kops delete cluster --name "${NAME}" --yes
+
+# 2) Terraform VPC / DNS / IRSA / KMS (dev stack)
+cd infra-live/dev && terraform init && terraform destroy -auto-approve
+
+# 3) Optional last: remote state + kOps state buckets
+# cd infra-live/_bootstrap && terraform init && terraform destroy -auto-approve
+```
+
+Then confirm no leftover EC2 / k8s NLBs / unattached EIPs (commands in the runbook).
