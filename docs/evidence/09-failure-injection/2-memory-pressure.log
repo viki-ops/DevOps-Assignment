@@ -1,0 +1,29 @@
+=== Kyverno blocked untagged stress image (policy working) ===
+disallow-latest-tag denied polinux/stress (implicit :latest)
+using polinux/stress:1.0.4 sha256:b6144f84f9c15dac80deb48d3a646b55c7043ab1d83ea0a697c09097aaad21aa
+NAME            READY   STATUS    RESTARTS   AGE   IP            NODE                  NOMINATED NODE   READINESS GATES
+memory-stress   1/1     Running   0          46s   100.96.12.7   i-01a10d51c8ab5bb15   <none>           <none>
+Status:           Running
+    Limits:
+    reason: PodFailed
+    reason: PodFailed
+        reason: OOMKilled
+  phase: Failed
+NAME            READY   STATUS      RESTARTS   AGE
+memory-stress   0/1     OOMKilled   0          42s
+    State:          Terminated
+      Reason:       OOMKilled
+      Exit Code:    137
+      Started:      Tue, 08 Sep 2026 04:59:50 +0000
+43s         Normal    Scheduled                      pod/memory-stress                    Successfully assigned retail-store-dev/memory-stress to i-01a10d51c8ab5bb15
+2m4s        Normal    Scheduled                      pod/memory-stress                    Successfully assigned retail-store-dev/memory-stress to i-01a10d51c8ab5bb15
+2m4s        Normal    Pulling                        pod/memory-stress                    Pulling image "polinux/stress@sha256:b6144f84f9c15dac80deb48d3a646b55c7043ab1d83ea0a697c09097aaad21aa"
+2m1s        Normal    Started                        pod/memory-stress                    Started container stress
+2m1s        Normal    Created                        pod/memory-stress                    Created container: stress
+2m1s        Normal    Pulled                         pod/memory-stress                    Successfully pulled image "polinux/stress@sha256:b6144f84f9c15dac80deb48d3a646b55c7043ab1d83ea0a697c09097aaad21aa" in 2.336s (2.336s including waiting). Image size: 4041495 bytes.
+76s         Normal    Killing                        pod/memory-stress                    Stopping container stress
+43s         Normal    Started                        pod/memory-stress                    Started container stress
+43s         Normal    Created                        pod/memory-stress                    Created container: stress
+43s         Normal    Pulled                         pod/memory-stress                    Container image "polinux/stress@sha256:b6144f84f9c15dac80deb48d3a646b55c7043ab1d83ea0a697c09097aaad21aa" already present on machine
+REMEDIATED: deleted memory-stress; retail pods unaffected
+     10 Running

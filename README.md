@@ -1,86 +1,55 @@
-# Multi-Environment Kubernetes Platform on AWS
+# DevOps Assignment — HA Kubernetes platform on AWS
 
-Terraform foundations, a highly-available kOps cluster, Ansible lifecycle automation,
-Helm-packaged microservices and ArgoCD App-of-Apps GitOps — built end to end on AWS.
+Monorepo delivering a highly available Kubernetes platform on AWS with
+Terraform, kOps, Ansible, Helm and ArgoCD.
 
-| Layer | Directory | Tool |
-|---|---|---|
-| AWS foundations | [`infra-modules/`](infra-modules/), [`infra-live/`](infra-live/) | Terraform 1.16.1 |
-| Cluster lifecycle | [`cluster-ops/`](cluster-ops/) | kOps 1.36.2 + Ansible 2.17 |
-| Application packaging | [`apps/`](apps/) | Helm 3.21.4 |
-| Continuous delivery | [`gitops/`](gitops/) | ArgoCD 3.5.2 |
-| Runbooks and evidence | [`docs/`](docs/) | — |
+> **Brief deviation:** the assignment asked for five separate repositories.
+> This is one monorepo with five top-level components so review stays coherent.
+> `scripts/` includes a path to split later if required.
 
----
+## Layout
 
-## Structure: one repository, five components
+| Path | Role |
+|------|------|
+| `infra-modules/` | Reusable Terraform (VPC, DNS, KMS, IRSA, …) |
+| `infra-live/` | Bootstrapped S3 backend + `dev` stack |
+| `cluster-ops/` | Ansible: toolchain, kOps cluster, ArgoCD bootstrap |
+| `apps/charts/` | Five retail Helm charts (digest-pinned, HPA, PDB, schema) |
+| `gitops/` | App-of-apps, AppProjects, values, policies, observability |
+| `docs/` | ADRs, runbooks, postmortems, evidence pack |
 
-The assignment brief asks for five separate repositories. This submission delivers
-them as five self-contained top-level directories in one repository instead.
+## What’s running (dev)
 
-That is a deliberate, and the only, deviation from the brief. It is called out here
-rather than left to be discovered:
+- kOps HA cluster `dev.k8s.local` (3 CP / 2 on-demand + 2 spot / bastion), Cilium, IRSA
+- ArgoCD 3.5.2 with platform + retail app-of-apps
+- ingress-nginx NLB, external-dns → `corp.example.internal`, Kyverno guardrails
+- kube-prometheus-stack + 99.5% storefront SLO burn-rate alerts
+- Retail storefront: `store.corp.example.internal` (private DNS) / NLB + Host header publicly
 
-- **The substance of the requirement is preserved.** The brief's actual requirement is
-  *"Each repo must contain its own README.md with exact commands and a runbook."*
-  Every one of the five components has its own `README.md` and runbook.
-- **Module version pinning still happens over git**, not via relative paths.
-  `infra-live` consumes `infra-modules` through pinned git refs, exactly as it would
-  across separate repositories — see [Module pinning](#module-pinning) below.
-- **Splitting is one command.** [`scripts/split-repos.sh`](scripts/split-repos.sh) uses
-  `git subtree split` to publish all five as standalone repositories with their
-  per-component commit history intact, should the reviewer prefer that layout.
-
-Two things genuinely improve as a result: the promotion pull requests in
-[Part 5](docs/runbooks/promotion.md) become single-repo PRs gated by
-[`CODEOWNERS`](CODEOWNERS), and ArgoCD needs only one repository registration —
-every `Application` shares a `repoURL` and differs only by `path`.
-
----
-
-## Deviations from the brief, in full
-
-Honesty about scope is more useful than a checklist that quietly overstates itself.
-
-| # | Brief says | What was built | Why |
-|---|---|---|---|
-| 1 | Five separate repositories | One monorepo, five components, split script provided | See above |
-| 2 | Route53 hosted zone, e.g. `corp.example.internal` | Route53 **private** hosted zone `corp.example.internal` | `.internal` is permanently reserved by ICANN and *cannot* be publicly delegated — see [ADR 0002](docs/adr/0002-dns-topology.md) |
-| 3 | cert-manager with ACME issuers | Self-signed CA issuer active in dev; ACME staging/prod issuers committed and wired to stage/prod | ACME requires a publicly resolvable domain; none is registered |
-| 4 | dev / stage / prod environments | dev is a real cluster; stage and prod are separate ArgoCD destinations (namespaces + AppProjects) on it | Three HA clusters would cost ~3x; the promotion workflow is still demonstrated for real, including digest equality |
-| 5 | — | `infra-live/stage` and `infra-live/prod` are written and `plan`-clean but never applied | Same cost reason; the code is complete and reviewable |
-
----
-
-## Quickstart — one command per layer
+## Quickstart (operator)
 
 ```bash
-make tools      # cluster-ops/playbooks/install-tools.yml  - pinned toolchain
-make infra      # infra-live/dev  - terraform init + apply
-make cluster    # cluster-ops/playbooks/cluster-create.yml - kOps create/update/validate
-make gitops     # bootstrap ArgoCD; the root Application takes over from here
-make evidence   # collect CLI evidence into docs/evidence/
-make destroy    # cluster-destroy.yml + terraform destroy
+# Tools
+ansible-playbook cluster-ops/playbooks/install-tools.yml
+
+# Infra (once)
+cd infra-live/_bootstrap && terraform init && terraform apply
+cd ../dev && terraform init && terraform apply
+
+# Cluster + ArgoCD
+ansible-playbook cluster-ops/playbooks/cluster-create.yml
+ansible-playbook cluster-ops/playbooks/argocd-bootstrap.yml
+kubectl apply -f gitops/projects/ -f gitops/bootstrap/
 ```
 
-## Module pinning
+## Evidence
 
-`infra-live` never uses relative module paths. Each stack pins a git ref against this
-repository, so the dependency is versioned and auditable exactly as it would be across
-separate repositories:
+See `docs/evidence/` (numbered by phase) and `docs/postmortems/`.
 
-```hcl
-module "vpc" {
-  source = "git::https://github.com/viki-ops/DevOps-Assignment.git//infra-modules/vpc?ref=v0.1.0"
-}
+## Promotion
+
+```bash
+./scripts/prove-digest-equality.sh
 ```
 
-`make dev-local` rewrites those to relative paths for fast iteration; CI asserts that
-what lands on `main` uses the pinned form.
-
-## Documentation
-
-- [Runbooks](docs/runbooks/) — provisioning, upgrade, rollback, recovery, promotion
-- [Architecture decisions](docs/adr/) — Kubernetes version, DNS topology, IRSA ownership
-- [Evidence](docs/evidence/) — CLI output and screenshots per part of the brief
-- [Postmortems](docs/postmortems/) — the two injected failures
+dev auto-syncs; stage/prod require manual Sync (see `docs/runbooks/promotion.md`).

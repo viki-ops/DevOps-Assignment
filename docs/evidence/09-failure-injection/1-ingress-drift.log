@@ -1,0 +1,8 @@
+=== BEFORE drift ===
+store.corp.example.internal
+sync=Synced heal=Healthy
+=== AFTER drift (before heal) ===
+drifted.example.invalid
+sync=Synced
+t=10s host=store.corp.example.internal sync=Synced
+HEALED
