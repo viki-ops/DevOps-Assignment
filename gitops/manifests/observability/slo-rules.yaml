@@ -31,11 +31,12 @@ spec:
         - record: retail:sli:errors:rate5m
           expr: |
             sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[5m]))
+            or vector(0)
 
         - record: retail:sli:availability:ratio5m
           expr: |
             1 - (
-              clamp_min(retail:sli:errors:rate5m, 0)
+              retail:sli:errors:rate5m
               /
               clamp_min(retail:sli:requests:rate5m, 1e-9)
             )
@@ -43,7 +44,10 @@ spec:
         - record: retail:sli:availability:ratio1h
           expr: |
             1 - (
-              sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[1h]))
+              (
+                sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[1h]))
+                or vector(0)
+              )
               /
               clamp_min(sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev"}[1h])), 1e-9)
             )
@@ -51,7 +55,10 @@ spec:
         - record: retail:sli:availability:ratio6h
           expr: |
             1 - (
-              sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[6h]))
+              (
+                sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[6h]))
+                or vector(0)
+              )
               /
               clamp_min(sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev"}[6h])), 1e-9)
             )
@@ -84,7 +91,10 @@ spec:
             (
               (
                 1 - (
-                  sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[30m]))
+                  (
+                    sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[30m]))
+                    or vector(0)
+                  )
                   /
                   clamp_min(sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev"}[30m])), 1e-9)
                 )
