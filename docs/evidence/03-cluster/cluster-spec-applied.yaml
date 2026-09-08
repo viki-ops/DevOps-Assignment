@@ -1,0 +1,156 @@
+apiVersion: kops.k8s.io/v1alpha2
+kind: Cluster
+metadata:
+  generation: 1
+  name: dev.k8s.local
+spec:
+  additionalPolicies:
+    master: |
+      [{"Action":["ssmmessages:OpenDataChannel","ssmmessages:OpenControlChannel","ssmmessages:CreateDataChannel","ssmmessages:CreateControlChannel","ssm:UpdateInstanceInformation","ec2messages:SendReply","ec2messages:GetMessages","ec2messages:GetEndpoint","ec2messages:FailMessage","ec2messages:DeleteMessage","ec2messages:AcknowledgeMessage"],"Effect":"Allow","Resource":"*","Sid":"SsmSessionManager"},{"Action":["kms:ReEncrypt*","kms:GenerateDataKey*","kms:Encrypt","kms:DescribeKey","kms:Decrypt"],"Effect":"Allow","Resource":"arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c","Sid":"EtcdVolumeEncryption"},{"Action":"kms:CreateGrant","Condition":{"Bool":{"kms:GrantIsForAWSResource":"true"}},"Effect":"Allow","Resource":"arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c","Sid":"CreateGrantForEtcdVolumes"},{"Action":["s3:PutObjectAcl","s3:PutObject","s3:ListBucket","s3:GetObject"],"Effect":"Allow","Resource":["arn:aws:s3:::platform-dev-oidc-eun1-125788629837/*","arn:aws:s3:::platform-dev-oidc-eun1-125788629837"],"Sid":"PublishOidcDiscovery"}]
+    node: |
+      [{"Action":["ssmmessages:OpenDataChannel","ssmmessages:OpenControlChannel","ssmmessages:CreateDataChannel","ssmmessages:CreateControlChannel","ssm:UpdateInstanceInformation","ssm:ListInstanceAssociations","ssm:ListAssociations","ec2messages:SendReply","ec2messages:GetMessages","ec2messages:GetEndpoint","ec2messages:FailMessage","ec2messages:DeleteMessage","ec2messages:AcknowledgeMessage"],"Effect":"Allow","Resource":"*","Sid":"SsmSessionManager"},{"Action":["ec2:DescribeTags","ec2:DescribeInstances"],"Effect":"Allow","Resource":"*","Sid":"DescribeTags"},{"Action":["kms:GenerateDataKeyWithoutPlaintext","kms:DescribeKey","kms:Decrypt"],"Effect":"Allow","Resource":"arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c","Sid":"UsePlatformKey"},{"Action":"s3:GetObject","Effect":"Allow","Resource":"arn:aws:s3:::platform-dev-oidc-eun1-125788629837/*","Sid":"ReadOidcDiscovery"}]
+  api:
+    loadBalancer:
+      class: Network
+      subnets:
+      - name: utility-eu-north-1a
+      - name: utility-eu-north-1b
+      - name: utility-eu-north-1c
+      type: Public
+  authorization:
+    rbac: {}
+  certManager:
+    enabled: true
+  channel: stable
+  cloudConfig:
+    awsEBSCSIDriver:
+      enabled: true
+    manageStorageClasses: true
+  cloudLabels:
+    Cluster: dev.k8s.local
+    Environment: dev
+    ManagedBy: kops
+    Owner: viki-ops
+    Project: platform
+  cloudProvider: aws
+  configBase: s3://platform-kops-state-eun1-125788629837/dev.k8s.local
+  encryptionConfig: true
+  etcdClusters:
+  - etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: control-plane-eu-north-1a
+      kmsKeyId: arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c
+      name: a
+      volumeSize: 20
+      volumeType: gp3
+    - encryptedVolume: true
+      instanceGroup: control-plane-eu-north-1b
+      kmsKeyId: arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c
+      name: b
+      volumeSize: 20
+      volumeType: gp3
+    - encryptedVolume: true
+      instanceGroup: control-plane-eu-north-1c
+      kmsKeyId: arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c
+      name: c
+      volumeSize: 20
+      volumeType: gp3
+    manager:
+      backupRetentionDays: 7
+    name: main
+  - etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: control-plane-eu-north-1a
+      kmsKeyId: arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c
+      name: a
+      volumeSize: 10
+      volumeType: gp3
+    - encryptedVolume: true
+      instanceGroup: control-plane-eu-north-1b
+      kmsKeyId: arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c
+      name: b
+      volumeSize: 10
+      volumeType: gp3
+    - encryptedVolume: true
+      instanceGroup: control-plane-eu-north-1c
+      kmsKeyId: arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c
+      name: c
+      volumeSize: 10
+      volumeType: gp3
+    manager:
+      backupRetentionDays: 7
+    name: events
+  iam:
+    allowContainerRegistry: true
+    legacy: false
+    useServiceAccountExternalPermissions: true
+  kubeAPIServer:
+    auditLogMaxAge: 7
+    auditLogMaxBackups: 2
+    auditLogMaxSize: 100
+    auditLogPath: /var/log/kube-apiserver-audit.log
+    serviceAccountIssuer: https://platform-dev-oidc-eun1-125788629837.s3.eu-north-1.amazonaws.com
+    serviceAccountJWKSURI: https://platform-dev-oidc-eun1-125788629837.s3.eu-north-1.amazonaws.com/openid/v1/jwks
+  kubeProxy:
+    enabled: true
+  kubelet:
+    anonymousAuth: false
+    authenticationTokenWebhook: true
+    authorizationMode: Webhook
+    evictionHard: memory.available<200Mi,nodefs.available<10%
+    kubeReserved:
+      cpu: 100m
+      memory: 256Mi
+    systemReserved:
+      cpu: 100m
+      memory: 256Mi
+  kubernetesApiAccess:
+  - 59.92.35.231/32
+  kubernetesVersion: 1.34.10
+  metricsServer:
+    enabled: true
+    insecure: false
+  networkCIDR: 10.20.0.0/16
+  networkID: vpc-0f9f899fb457031b8
+  networking:
+    cilium:
+      hubble:
+        enabled: false
+  nonMasqueradeCIDR: 100.64.0.0/10
+  podIdentityWebhook:
+    enabled: true
+  serviceAccountIssuerDiscovery:
+    discoveryStore: s3://platform-dev-oidc-eun1-125788629837
+  sshAccess:
+  - 59.92.35.231/32
+  subnets:
+  - egress: nat-00748867c59e27166
+    id: subnet-09fdf972ec95dac5e
+    name: eu-north-1a
+    type: Private
+    zone: eu-north-1a
+  - egress: nat-05381ed15569f367f
+    id: subnet-0c04e4238dd4494d9
+    name: eu-north-1b
+    type: Private
+    zone: eu-north-1b
+  - egress: nat-05381ed15569f367f
+    id: subnet-07817c9d6a824144e
+    name: eu-north-1c
+    type: Private
+    zone: eu-north-1c
+  - id: subnet-0eeb5637ec567e4e9
+    name: utility-eu-north-1a
+    type: Utility
+    zone: eu-north-1a
+  - id: subnet-021172b46316df8eb
+    name: utility-eu-north-1b
+    type: Utility
+    zone: eu-north-1b
+  - id: subnet-0bc3aaf2632ea291b
+    name: utility-eu-north-1c
+    type: Utility
+    zone: eu-north-1c
+  topology:
+    dns:
+      type: None

@@ -1,0 +1,244 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# =============================================================================
+# GENERATED FILE - DO NOT EDIT BY HAND
+#
+# Rendered by cluster-ops/roles/kops_cluster from
+# roles/kops_cluster/templates/cluster.yaml.j2, using live Terraform outputs
+# (`terraform -chdir={{ terraform_live_dir }} output -json`).
+#
+# Every VPC, subnet, NAT, KMS and OIDC value below came from the Terraform
+# state, so the two layers cannot drift apart by copy-paste error.
+#
+# Cluster:    {{ cluster_name }}
+# Kubernetes: {{ kubernetes_version }}
+# Rendered:   {{ ansible_date_time.iso8601 }}
+#
+# NOTE: no leading "---". A document separator here, after the comment block,
+# would open an empty first document and kOps rejects the file with
+# "Object 'Kind' is missing in 'null'".
+# =============================================================================
+apiVersion: kops.k8s.io/v1alpha2
+kind: Cluster
+metadata:
+  name: {{ cluster_name }}
+spec:
+  channel: stable
+  cloudProvider: aws
+  configBase: {{ kops_state_store }}/{{ cluster_name }}
+  kubernetesVersion: {{ kubernetes_version }}
+
+  # --- Networking: adopt the Terraform-managed VPC -------------------------
+  # networkID makes this a "shared" VPC. kOps will create nothing at the VPC
+  # level and, critically, will not delete the VPC on `kops delete cluster`.
+  networkID: {{ tfk.vpc_id }}
+  networkCIDR: {{ tfk.vpc_cidr }}
+
+  # Traffic to addresses outside this range is SNATed to the node IP. Set
+  # explicitly rather than relying on the default: `kops create` fills defaults
+  # in, but `kops replace` does not, so leaving it out makes the cluster
+  # creatable but not reconcilable ("Cluster does not have nonMasqueradeCIDR
+  # set" on the second run).
+  #
+  # 100.64.0.0/10 is the carrier-grade NAT range - deliberately outside the
+  # VPC CIDR so pod and node address space cannot collide.
+  nonMasqueradeCIDR: 100.64.0.0/10
+
+  subnets:
+{% for az in tfk.azs %}
+    - name: {{ az }}
+      id: {{ tfk.private_subnets[az] }}
+      type: Private
+      zone: {{ az }}
+      # Point at the existing NAT gateway. Without this kOps provisions its own
+      # NAT gateways inside our VPC - duplicate cost, and resources Terraform
+      # would never clean up.
+      egress: {{ tfk.nat_by_az[az] }}
+{% endfor %}
+{% for az in tfk.azs %}
+    - name: utility-{{ az }}
+      id: {{ tfk.public_subnets[az] }}
+      type: Utility
+      zone: {{ az }}
+{% endfor %}
+
+  # --- Topology ------------------------------------------------------------
+  topology:
+    # None-DNS. kOps publishes no DNS records at all and writes the API load
+    # balancer's AWS hostname straight into kubeconfig, which is what allows
+    # this cluster to exist without a registered public domain.
+    # See docs/adr/0002-dns-topology.md.
+    dns:
+      type: None
+
+  api:
+    loadBalancer:
+      # None-DNS requires a Network Load Balancer; a Classic LB is rejected.
+      class: Network
+      type: Public
+      # Terminate the API LB in the public subnets so kubectl works from the
+      # operator workstation. Access is still restricted by kubernetesApiAccess.
+      subnets:
+{% for az in tfk.azs %}
+        - name: utility-{{ az }}
+{% endfor %}
+
+  # Locked to the operator's egress address rather than 0.0.0.0/0.
+  kubernetesApiAccess:
+    - {{ operator_cidr }}
+{% for cidr in kops_api_access_extra_cidrs %}
+    - {{ cidr }}
+{% endfor %}
+
+  sshAccess:
+    - {{ operator_cidr }}
+{% for cidr in kops_ssh_access_extra_cidrs %}
+    - {{ cidr }}
+{% endfor %}
+
+  # --- CNI -----------------------------------------------------------------
+  # Cilium, with NetworkPolicy enforcement. kube-proxy is left enabled: Cilium
+  # can replace it, but that is an additional failure mode we do not need, and
+  # the brief asks for network policies, not for kube-proxy replacement.
+  networking:
+    cilium:
+      hubble:
+        enabled: false
+
+  kubeProxy:
+    enabled: true
+
+  # --- Kubelet hardening ---------------------------------------------------
+  # kOps leaves anonymousAuth on by default and warns about it on every update:
+  # "Kubelet anonymousAuth is currently turned on. This allows RBAC escalation
+  # and remote code execution possibilities."
+  #
+  # With it enabled, anything that can reach a kubelet's port 10250 - including
+  # a compromised pod - can hit that API unauthenticated. Turning it off, plus
+  # requiring webhook authorization rather than the default AlwaysAllow, closes
+  # the direct path from "pod escapes" to "runs commands in any container on
+  # the node".
+  kubelet:
+    anonymousAuth: false
+    authenticationTokenWebhook: true
+    authorizationMode: Webhook
+    # Reserve headroom for the kubelet and the OS so a runaway pod cannot
+    # starve the node agent and trigger a NotReady cascade. Directly relevant
+    # to the Part 6 memory-pressure failure injection.
+    kubeReserved:
+      cpu: 100m
+      memory: 256Mi
+    systemReserved:
+      cpu: 100m
+      memory: 256Mi
+    evictionHard: memory.available<200Mi,nodefs.available<10%
+
+  # --- Identity: IRSA ------------------------------------------------------
+  iam:
+    legacy: false
+    allowContainerRegistry: true
+    # Lets kOps-managed addons assume their own dedicated IAM roles rather than
+    # inheriting the node instance profile.
+    useServiceAccountExternalPermissions: true
+
+  serviceAccountIssuerDiscovery:
+    discoveryStore: {{ tfk.oidc_discovery_store }}
+    # False on purpose: Terraform owns the IAM OIDC provider (the brief requires
+    # Terraform to provision IRSA and export the issuer). If kOps also created
+    # one, the two would fight over the same IAM resource.
+    enableAWSOIDCProvider: false
+
+  kubeAPIServer:
+    # Pinned explicitly rather than left for kOps to derive. Terraform already
+    # created the IAM OIDC provider for exactly this URL, so pinning both sides
+    # guarantees they agree - a mismatch here makes every IRSA role fail to
+    # assume, with an error that only surfaces inside pod logs.
+    serviceAccountIssuer: {{ tfk.oidc_issuer_url }}
+    serviceAccountJWKSURI: {{ tfk.oidc_jwks_uri }}
+    auditLogMaxAge: 7
+    auditLogMaxBackups: 2
+    auditLogMaxSize: 100
+    auditLogPath: /var/log/kube-apiserver-audit.log
+
+  # --- Secret encryption at rest -------------------------------------------
+  # Enables the EncryptionConfiguration supplied via the `encryptionconfig`
+  # kOps secret, so Secret objects are encrypted in etcd rather than stored
+  # base64-encoded.
+  #
+  # This uses aescbc, not the AWS KMS provider. The KMS provider needs a
+  # kms-plugin socket running on every control-plane node, which kOps does not
+  # ship. The CMK still protects this data: the etcd volumes themselves are
+  # KMS-encrypted below. See docs/adr/0003-secrets-encryption.md.
+  encryptionConfig: true
+
+  # --- etcd ----------------------------------------------------------------
+{% for etcd_cluster in ['main', 'events'] %}
+  {% if loop.first %}
+  etcdClusters:
+  {% endif %}
+    - name: {{ etcd_cluster }}
+      manager:
+        backupRetentionDays: 7
+      etcdMembers:
+{% for az in tfk.azs %}
+        - name: {{ az[-1] }}
+          instanceGroup: control-plane-{{ az }}
+          # Every etcd volume is encrypted with the platform CMK. etcd holds
+          # every Secret in the cluster, so this is the highest-value data we
+          # store.
+          encryptedVolume: true
+          kmsKeyId: {{ tfk.kms_key_arn }}
+          volumeType: gp3
+          volumeSize: {{ 20 if etcd_cluster == 'main' else 10 }}
+{% endfor %}
+{% endfor %}
+
+  # --- kOps-managed addons -------------------------------------------------
+  # Only the bootstrap-critical pieces are managed by kOps. Everything else
+  # (ingress-nginx, external-dns, cluster-autoscaler, AWS LBC, External
+  # Secrets, Kyverno, kube-prometheus-stack, the applications) arrives through
+  # ArgoCD. See docs/adr/0004-bootstrap-vs-gitops.md for where the line is
+  # drawn and why.
+
+  # cert-manager is managed by kOps because podIdentityWebhook has a hard
+  # dependency on it at cluster-creation time, and cert-manager supports only
+  # one installation per cluster. Issuers and Certificates are still GitOps.
+  certManager:
+    enabled: true
+
+  # Mutates pods to inject AWS_ROLE_ARN and the projected token volume. Without
+  # this, the eks.amazonaws.com/role-arn ServiceAccount annotation does nothing
+  # and every IRSA-dependent controller silently falls back to the node role.
+  podIdentityWebhook:
+    enabled: true
+
+  # Required by HPA, which Part 3 of the brief depends on.
+  metricsServer:
+    enabled: true
+    insecure: false
+
+  cloudConfig:
+    # The in-tree EBS provisioner is gone in modern Kubernetes; without the CSI
+    # driver, every PersistentVolumeClaim stays Pending. Version is left to the
+    # kOps channel so it stays consistent with the Kubernetes version.
+    awsEBSCSIDriver:
+      enabled: true
+    manageStorageClasses: true
+
+  # --- Extra IAM ------------------------------------------------------------
+  # Statement arrays produced by the Terraform cluster_iam module: SSM Session
+  # Manager for break-glass access, KMS use for encrypted volumes, and OIDC
+  # discovery publication.
+  additionalPolicies:
+    node: |
+      {{ tfk.additional_policies.node }}
+    control-plane: |
+      {{ tfk.additional_policies['control-plane'] }}
+
+  # Applied to every AWS resource kOps creates, so the teardown leak-check can
+  # find anything left behind.
+  cloudLabels:
+    Project: {{ project }}
+    Environment: {{ env }}
+    ManagedBy: kops
+    Cluster: {{ cluster_name }}
+    Owner: viki-ops

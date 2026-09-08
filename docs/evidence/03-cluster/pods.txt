@@ -1,0 +1,62 @@
+NAMESPACE     NAME                                            READY   STATUS    RESTARTS        AGE     IP             NODE                  NOMINATED NODE   READINESS GATES
+kube-system   aws-cloud-controller-manager-8n4px              1/1     Running   0               49m     10.20.8.201    i-0b8fdbe8df706f7c6   <none>           <none>
+kube-system   aws-cloud-controller-manager-mzgzr              1/1     Running   0               49m     10.20.52.180   i-013378707ef7e9719   <none>           <none>
+kube-system   aws-cloud-controller-manager-vfj4g              1/1     Running   0               49m     10.20.68.4     i-0f70cc465f12a3d1e   <none>           <none>
+kube-system   aws-node-termination-handler-756fc57f97-67zbb   1/1     Running   0               3h30m   100.96.6.24    i-06760ff1926bc7eff   <none>           <none>
+kube-system   aws-node-termination-handler-756fc57f97-bbztp   1/1     Running   0               3h30m   100.96.5.91    i-06a46105aedb09d86   <none>           <none>
+kube-system   cert-manager-7699f5b75b-qxsl8                   1/1     Running   0               3h30m   100.96.1.163   i-0b8fdbe8df706f7c6   <none>           <none>
+kube-system   cert-manager-cainjector-744f675bf-gq2lm         1/1     Running   0               3h30m   100.96.1.52    i-0b8fdbe8df706f7c6   <none>           <none>
+kube-system   cert-manager-webhook-569b97998-6mb2b            1/1     Running   0               3h30m   100.96.1.238   i-0b8fdbe8df706f7c6   <none>           <none>
+kube-system   cilium-5dcdr                                    1/1     Running   0               3h29m   10.20.22.52    i-06760ff1926bc7eff   <none>           <none>
+kube-system   cilium-926wz                                    1/1     Running   0               3h30m   10.20.8.201    i-0b8fdbe8df706f7c6   <none>           <none>
+kube-system   cilium-bgbtq                                    1/1     Running   0               3h29m   10.20.80.11    i-03abd46c905e42c0e   <none>           <none>
+kube-system   cilium-jvhml                                    1/1     Running   0               3h30m   10.20.68.4     i-0f70cc465f12a3d1e   <none>           <none>
+kube-system   cilium-lsnpk                                    1/1     Running   0               3h29m   10.20.25.35    i-06a46105aedb09d86   <none>           <none>
+kube-system   cilium-operator-6cbfc598f9-2znkf                1/1     Running   0               3h30m   10.20.52.180   i-013378707ef7e9719   <none>           <none>
+kube-system   cilium-operator-6cbfc598f9-m2b6c                1/1     Running   0               3h30m   10.20.68.4     i-0f70cc465f12a3d1e   <none>           <none>
+kube-system   cilium-s66xj                                    1/1     Running   0               3h29m   10.20.81.238   i-07d0a9e1a5d2885c0   <none>           <none>
+kube-system   cilium-z2g9l                                    1/1     Running   0               3h30m   10.20.52.180   i-013378707ef7e9719   <none>           <none>
+kube-system   coredns-7999fc5b59-q8k5b                        1/1     Running   0               3h30m   100.96.6.62    i-06760ff1926bc7eff   <none>           <none>
+kube-system   coredns-7999fc5b59-vmfdx                        1/1     Running   0               90m     100.96.3.235   i-07d0a9e1a5d2885c0   <none>           <none>
+kube-system   coredns-autoscaler-75965c4fc6-gtddm             1/1     Running   0               3h30m   100.96.6.203   i-06760ff1926bc7eff   <none>           <none>
+kube-system   ebs-csi-controller-64f6d5c74b-bqcjl             5/5     Running   0               3h30m   100.96.6.12    i-06760ff1926bc7eff   <none>           <none>
+kube-system   ebs-csi-controller-64f6d5c74b-hctlf             5/5     Running   0               3h30m   100.96.5.226   i-06a46105aedb09d86   <none>           <none>
+kube-system   ebs-csi-node-2xsnc                              3/3     Running   0               91m     100.96.6.103   i-06760ff1926bc7eff   <none>           <none>
+kube-system   ebs-csi-node-5pms6                              3/3     Running   0               91m     100.96.0.250   i-013378707ef7e9719   <none>           <none>
+kube-system   ebs-csi-node-fsxrs                              3/3     Running   0               91m     100.96.5.126   i-06a46105aedb09d86   <none>           <none>
+kube-system   ebs-csi-node-km5ll                              3/3     Running   0               91m     100.96.2.78    i-0f70cc465f12a3d1e   <none>           <none>
+kube-system   ebs-csi-node-m752n                              3/3     Running   0               91m     100.96.3.15    i-07d0a9e1a5d2885c0   <none>           <none>
+kube-system   ebs-csi-node-q5s2s                              3/3     Running   0               91m     100.96.1.5     i-0b8fdbe8df706f7c6   <none>           <none>
+kube-system   ebs-csi-node-txfng                              3/3     Running   0               91m     100.96.4.31    i-03abd46c905e42c0e   <none>           <none>
+kube-system   etcd-manager-events-i-013378707ef7e9719         1/1     Running   0               89m     10.20.52.180   i-013378707ef7e9719   <none>           <none>
+kube-system   etcd-manager-events-i-0b8fdbe8df706f7c6         1/1     Running   0               90m     10.20.8.201    i-0b8fdbe8df706f7c6   <none>           <none>
+kube-system   etcd-manager-events-i-0f70cc465f12a3d1e         1/1     Running   0               89m     10.20.68.4     i-0f70cc465f12a3d1e   <none>           <none>
+kube-system   etcd-manager-main-i-013378707ef7e9719           1/1     Running   0               90m     10.20.52.180   i-013378707ef7e9719   <none>           <none>
+kube-system   etcd-manager-main-i-0b8fdbe8df706f7c6           1/1     Running   0               89m     10.20.8.201    i-0b8fdbe8df706f7c6   <none>           <none>
+kube-system   etcd-manager-main-i-0f70cc465f12a3d1e           1/1     Running   0               89m     10.20.68.4     i-0f70cc465f12a3d1e   <none>           <none>
+kube-system   kops-channels-i-013378707ef7e9719               1/1     Running   0               89m     10.20.52.180   i-013378707ef7e9719   <none>           <none>
+kube-system   kops-channels-i-0b8fdbe8df706f7c6               1/1     Running   0               89m     10.20.8.201    i-0b8fdbe8df706f7c6   <none>           <none>
+kube-system   kops-channels-i-0f70cc465f12a3d1e               1/1     Running   0               89m     10.20.68.4     i-0f70cc465f12a3d1e   <none>           <none>
+kube-system   kops-controller-99g8l                           1/1     Running   0               3h29m   10.20.52.180   i-013378707ef7e9719   <none>           <none>
+kube-system   kops-controller-fmkbj                           1/1     Running   0               3h29m   10.20.8.201    i-0b8fdbe8df706f7c6   <none>           <none>
+kube-system   kops-controller-vn9m6                           1/1     Running   0               3h29m   10.20.68.4     i-0f70cc465f12a3d1e   <none>           <none>
+kube-system   kube-apiserver-i-013378707ef7e9719              2/2     Running   2 (3h30m ago)   3h30m   10.20.52.180   i-013378707ef7e9719   <none>           <none>
+kube-system   kube-apiserver-i-0b8fdbe8df706f7c6              2/2     Running   2 (3h30m ago)   3h29m   10.20.8.201    i-0b8fdbe8df706f7c6   <none>           <none>
+kube-system   kube-apiserver-i-0f70cc465f12a3d1e              2/2     Running   2 (3h30m ago)   3h29m   10.20.68.4     i-0f70cc465f12a3d1e   <none>           <none>
+kube-system   kube-controller-manager-i-013378707ef7e9719     1/1     Running   4 (3h30m ago)   89m     10.20.52.180   i-013378707ef7e9719   <none>           <none>
+kube-system   kube-controller-manager-i-0b8fdbe8df706f7c6     1/1     Running   3 (3h30m ago)   89m     10.20.8.201    i-0b8fdbe8df706f7c6   <none>           <none>
+kube-system   kube-controller-manager-i-0f70cc465f12a3d1e     1/1     Running   3 (3h30m ago)   90m     10.20.68.4     i-0f70cc465f12a3d1e   <none>           <none>
+kube-system   kube-proxy-i-013378707ef7e9719                  1/1     Running   0               89m     10.20.52.180   i-013378707ef7e9719   <none>           <none>
+kube-system   kube-proxy-i-03abd46c905e42c0e                  1/1     Running   0               89m     10.20.80.11    i-03abd46c905e42c0e   <none>           <none>
+kube-system   kube-proxy-i-06760ff1926bc7eff                  1/1     Running   0               89m     10.20.22.52    i-06760ff1926bc7eff   <none>           <none>
+kube-system   kube-proxy-i-06a46105aedb09d86                  1/1     Running   0               89m     10.20.25.35    i-06a46105aedb09d86   <none>           <none>
+kube-system   kube-proxy-i-07d0a9e1a5d2885c0                  1/1     Running   0               90m     10.20.81.238   i-07d0a9e1a5d2885c0   <none>           <none>
+kube-system   kube-proxy-i-0b8fdbe8df706f7c6                  1/1     Running   0               89m     10.20.8.201    i-0b8fdbe8df706f7c6   <none>           <none>
+kube-system   kube-proxy-i-0f70cc465f12a3d1e                  1/1     Running   0               89m     10.20.68.4     i-0f70cc465f12a3d1e   <none>           <none>
+kube-system   kube-scheduler-i-013378707ef7e9719              1/1     Running   4 (3h30m ago)   89m     10.20.52.180   i-013378707ef7e9719   <none>           <none>
+kube-system   kube-scheduler-i-0b8fdbe8df706f7c6              1/1     Running   3 (3h30m ago)   90m     10.20.8.201    i-0b8fdbe8df706f7c6   <none>           <none>
+kube-system   kube-scheduler-i-0f70cc465f12a3d1e              1/1     Running   3 (3h30m ago)   90m     10.20.68.4     i-0f70cc465f12a3d1e   <none>           <none>
+kube-system   metrics-server-776b8f47b9-twzcx                 1/1     Running   0               3h30m   100.96.5.190   i-06a46105aedb09d86   <none>           <none>
+kube-system   metrics-server-776b8f47b9-x5vw8                 1/1     Running   0               3h30m   100.96.6.99    i-06760ff1926bc7eff   <none>           <none>
+kube-system   pod-identity-webhook-7cbffc4d8b-wsljv           1/1     Running   0               3h30m   100.96.6.211   i-06760ff1926bc7eff   <none>           <none>
+kube-system   pod-identity-webhook-7cbffc4d8b-xdldc           1/1     Running   0               3h30m   100.96.5.11    i-06a46105aedb09d86   <none>           <none>

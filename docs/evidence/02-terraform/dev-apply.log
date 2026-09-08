@@ -1,0 +1,280 @@
+
+Warning: Deprecated Parameter
+
+The parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+instead.
+Acquiring state lock. This may take a few moments...
+tls_private_key.bastion: Creating...
+tls_private_key.bastion: Creation complete after 0s [id=e3010fcd6faba74beaa33895fd9eb5eb0709f637]
+local_file.bastion_public_key: Creating...
+local_sensitive_file.bastion_private_key: Creating...
+local_sensitive_file.bastion_private_key: Creation complete after 0s [id=c221208de176e3dd7766a5bd008b7ba6b8e11ed0]
+local_file.bastion_public_key: Creation complete after 0s [id=25607d4187d785c269be737f81a6de866cae7327]
+module.kops_oidc.aws_iam_openid_connect_provider.this: Creating...
+module.vpc.aws_vpc.this: Creating...
+module.iam.module.aws_load_balancer_controller.aws_iam_policy.managed[0]: Creating...
+module.iam.module.cluster_autoscaler.aws_iam_policy.managed[0]: Creating...
+module.kms.aws_kms_key.this: Creating...
+module.kops_oidc.aws_s3_bucket.oidc: Creating...
+module.kops_oidc.aws_iam_openid_connect_provider.this: Creation complete after 1s [id=arn:aws:iam::125788629837:oidc-provider/platform-dev-oidc-eun1-125788629837.s3.eu-north-1.amazonaws.com]
+module.argocd_iam.module.repo_server.data.aws_iam_policy_document.assume: Reading...
+module.iam.module.external_secrets.data.aws_iam_policy_document.assume: Reading...
+module.iam.module.aws_load_balancer_controller.data.aws_iam_policy_document.assume: Reading...
+module.iam.module.cluster_autoscaler.data.aws_iam_policy_document.assume: Reading...
+module.iam.module.external_dns.data.aws_iam_policy_document.assume: Reading...
+module.iam.module.external_dns.data.aws_iam_policy_document.assume: Read complete after 0s [id=3341351589]
+module.iam.module.external_secrets.data.aws_iam_policy_document.assume: Read complete after 0s [id=182251850]
+module.iam.module.aws_load_balancer_controller.data.aws_iam_policy_document.assume: Read complete after 0s [id=1621087833]
+module.argocd_iam.module.repo_server.data.aws_iam_policy_document.assume: Read complete after 0s [id=636675867]
+module.iam.module.cluster_autoscaler.data.aws_iam_policy_document.assume: Read complete after 0s [id=509545105]
+module.iam.module.ebs_csi.data.aws_iam_policy_document.assume: Reading...
+module.iam.module.cert_manager.data.aws_iam_policy_document.assume: Reading...
+module.iam.module.cluster_autoscaler.aws_iam_role.this: Creating...
+module.iam.module.ebs_csi.data.aws_iam_policy_document.assume: Read complete after 0s [id=3615344552]
+module.iam.module.external_secrets.aws_iam_role.this: Creating...
+module.iam.module.aws_load_balancer_controller.aws_iam_role.this: Creating...
+module.argocd_iam.module.repo_server.aws_iam_role.this: Creating...
+module.iam.module.cert_manager.data.aws_iam_policy_document.assume: Read complete after 0s [id=1732694149]
+module.iam.module.ebs_csi.aws_iam_role.this: Creating...
+module.iam.module.cluster_autoscaler.aws_iam_policy.managed[0]: Creation complete after 2s [id=arn:aws:iam::125788629837:policy/platform-dev-cluster-autoscaler-policy]
+module.iam.module.aws_load_balancer_controller.aws_iam_policy.managed[0]: Creation complete after 2s [id=arn:aws:iam::125788629837:policy/platform-dev-aws-lbc-policy]
+module.iam.module.external_secrets.aws_iam_role.this: Creation complete after 1s [id=platform-dev-external-secrets]
+module.iam.module.aws_load_balancer_controller.aws_iam_role.this: Creation complete after 2s [id=platform-dev-aws-lbc]
+module.iam.module.ebs_csi.aws_iam_role.this: Creation complete after 2s [id=platform-dev-ebs-csi]
+module.iam.module.aws_load_balancer_controller.aws_iam_role_policy_attachment.managed[0]: Creating...
+module.argocd_iam.module.repo_server.aws_iam_role.this: Creation complete after 2s [id=platform-dev-argocd-repo-server]
+module.iam.module.ebs_csi.aws_iam_role_policy_attachment.extra["arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"]: Creating...
+module.iam.module.cluster_autoscaler.aws_iam_role.this: Creation complete after 2s [id=platform-dev-cluster-autoscaler]
+module.iam.module.cluster_autoscaler.aws_iam_role_policy_attachment.managed[0]: Creating...
+module.iam.module.aws_load_balancer_controller.aws_iam_role_policy_attachment.managed[0]: Creation complete after 0s [id=platform-dev-aws-lbc/arn:aws:iam::125788629837:policy/platform-dev-aws-lbc-policy]
+module.iam.module.ebs_csi.aws_iam_role_policy_attachment.extra["arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"]: Creation complete after 0s [id=platform-dev-ebs-csi/arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy]
+module.iam.module.cluster_autoscaler.aws_iam_role_policy_attachment.managed[0]: Creation complete after 0s [id=platform-dev-cluster-autoscaler/arn:aws:iam::125788629837:policy/platform-dev-cluster-autoscaler-policy]
+module.vpc.aws_vpc.this: Creation complete after 5s [id=vpc-0f9f899fb457031b8]
+module.vpc.aws_subnet.public[1]: Creating...
+module.vpc.aws_route_table.public: Creating...
+module.vpc.aws_route_table.private[1]: Creating...
+module.vpc.aws_route_table.private[0]: Creating...
+module.vpc.aws_internet_gateway.this: Creating...
+module.vpc.aws_route_table.private[2]: Creating...
+module.dns.aws_route53_zone.this: Creating...
+module.vpc.aws_subnet.private[2]: Creating...
+module.kops_oidc.aws_s3_bucket.oidc: Creation complete after 6s [id=platform-dev-oidc-eun1-125788629837]
+module.vpc.aws_subnet.public[2]: Creating...
+module.vpc.aws_route_table.public: Creation complete after 2s [id=rtb-0d7ba550c06f34af1]
+module.vpc.aws_subnet.public[0]: Creating...
+module.vpc.aws_route_table.private[1]: Creation complete after 2s [id=rtb-04953a53caf784fef]
+module.vpc.aws_subnet.private[1]: Creating...
+module.vpc.aws_internet_gateway.this: Creation complete after 2s [id=igw-05d295a2dafa5ff81]
+module.vpc.aws_route_table.private[2]: Creation complete after 2s [id=rtb-034b951bbae5002ca]
+module.vpc.aws_route_table.private[0]: Creation complete after 2s [id=rtb-075aeab763c38006a]
+module.vpc.aws_subnet.private[0]: Creating...
+module.kops_oidc.data.aws_iam_policy_document.oidc: Reading...
+module.kops_oidc.aws_s3_bucket_public_access_block.oidc: Creating...
+module.kops_oidc.data.aws_iam_policy_document.oidc: Read complete after 0s [id=2801179401]
+module.kops_oidc.aws_s3_bucket_ownership_controls.oidc: Creating...
+module.vpc.aws_subnet.private[2]: Creation complete after 2s [id=subnet-07817c9d6a824144e]
+module.kops_oidc.aws_s3_bucket_server_side_encryption_configuration.oidc: Creating...
+module.vpc.aws_subnet.private[1]: Creation complete after 1s [id=subnet-0c04e4238dd4494d9]
+module.vpc.aws_route.public_default: Creating...
+module.vpc.aws_subnet.private[0]: Creation complete after 1s [id=subnet-09fdf972ec95dac5e]
+module.vpc.aws_eip.nat[0]: Creating...
+module.kops_oidc.aws_s3_bucket_public_access_block.oidc: Creation complete after 1s [id=platform-dev-oidc-eun1-125788629837]
+module.vpc.aws_eip.nat[1]: Creating...
+module.kops_oidc.aws_s3_bucket_ownership_controls.oidc: Creation complete after 2s [id=platform-dev-oidc-eun1-125788629837]
+module.vpc.aws_vpc_endpoint.s3: Creating...
+module.kops_oidc.aws_s3_bucket_server_side_encryption_configuration.oidc: Creation complete after 2s [id=platform-dev-oidc-eun1-125788629837]
+module.vpc.aws_route_table_association.private[0]: Creating...
+module.vpc.aws_eip.nat[0]: Creation complete after 2s [id=eipalloc-0c58ceb1225102b91]
+module.vpc.aws_route.public_default: Creation complete after 2s [id=r-rtb-0d7ba550c06f34af11080289494]
+module.vpc.aws_eip.nat[1]: Creation complete after 2s [id=eipalloc-001f8c72bf91de108]
+module.vpc.aws_route_table_association.private[1]: Creating...
+module.vpc.aws_route_table_association.private[2]: Creating...
+module.kops_oidc.aws_s3_bucket_policy.oidc: Creating...
+module.kms.aws_kms_key.this: Still creating... [00m10s elapsed]
+module.vpc.aws_route_table_association.private[0]: Creation complete after 1s [id=rtbassoc-0376293b73347a170]
+module.kops_oidc.aws_s3_bucket_acl.oidc: Creating...
+module.vpc.aws_route_table_association.private[2]: Creation complete after 1s [id=rtbassoc-0bf391168023d0531]
+module.vpc.aws_route_table_association.private[1]: Creation complete after 1s [id=rtbassoc-084673878d06f0bbb]
+module.kops_oidc.aws_s3_bucket_policy.oidc: Creation complete after 1s [id=platform-dev-oidc-eun1-125788629837]
+module.kops_oidc.aws_s3_bucket_acl.oidc: Creation complete after 1s [id=platform-dev-oidc-eun1-125788629837,public-read]
+module.vpc.aws_subnet.public[1]: Still creating... [00m10s elapsed]
+module.dns.aws_route53_zone.this: Still creating... [00m10s elapsed]
+module.vpc.aws_subnet.public[2]: Still creating... [00m10s elapsed]
+module.vpc.aws_subnet.public[0]: Still creating... [00m10s elapsed]
+module.vpc.aws_vpc_endpoint.s3: Creation complete after 8s [id=vpce-0e4f1e452a70ca942]
+module.vpc.aws_subnet.public[1]: Creation complete after 13s [id=subnet-021172b46316df8eb]
+module.vpc.aws_subnet.public[2]: Creation complete after 14s [id=subnet-0bc3aaf2632ea291b]
+module.kms.aws_kms_key.this: Still creating... [00m20s elapsed]
+module.vpc.aws_subnet.public[0]: Creation complete after 15s [id=subnet-0eeb5637ec567e4e9]
+module.vpc.aws_nat_gateway.this[0]: Creating...
+module.vpc.aws_route_table_association.public[2]: Creating...
+module.vpc.aws_route_table_association.public[1]: Creating...
+module.vpc.aws_route_table_association.public[0]: Creating...
+module.vpc.aws_nat_gateway.this[1]: Creating...
+module.vpc.aws_route_table_association.public[1]: Creation complete after 1s [id=rtbassoc-06b59f9d886ce5321]
+module.vpc.aws_route_table_association.public[0]: Creation complete after 1s [id=rtbassoc-0280ac22043dd43c7]
+module.vpc.aws_route_table_association.public[2]: Creation complete after 2s [id=rtbassoc-061192d69e220e52d]
+module.kms.aws_kms_key.this: Creation complete after 24s [id=c4e96a0d-2c49-4510-98a6-462338b8443c]
+module.cluster_iam.data.aws_iam_policy_document.control_plane: Reading...
+module.iam.data.aws_iam_policy_document.external_secrets: Reading...
+module.argocd_iam.data.aws_iam_policy_document.repo_server: Reading...
+module.iam.data.aws_iam_policy_document.ebs_csi_kms: Reading...
+module.cluster_iam.data.aws_iam_policy_document.node: Reading...
+module.cluster_iam.data.aws_iam_policy_document.node: Read complete after 0s [id=360479830]
+module.iam.data.aws_iam_policy_document.ebs_csi_kms: Read complete after 0s [id=1583642062]
+module.cluster_iam.data.aws_iam_policy_document.control_plane: Read complete after 0s [id=3946007602]
+module.argocd_iam.data.aws_iam_policy_document.repo_server: Read complete after 0s [id=718546203]
+module.iam.data.aws_iam_policy_document.external_secrets: Read complete after 0s [id=2089180440]
+module.kms.aws_kms_alias.this: Creating...
+module.argocd_iam.module.repo_server.aws_iam_policy.managed[0]: Creating...
+module.iam.module.external_secrets.aws_iam_policy.managed[0]: Creating...
+module.iam.module.ebs_csi.aws_iam_role_policy.inline[0]: Creating...
+module.kms.aws_kms_alias.this: Creation complete after 1s [id=alias/platform-dev]
+module.iam.module.ebs_csi.aws_iam_role_policy.inline[0]: Creation complete after 1s [id=platform-dev-ebs-csi:platform-dev-ebs-csi-inline]
+module.iam.module.external_secrets.aws_iam_policy.managed[0]: Creation complete after 1s [id=arn:aws:iam::125788629837:policy/platform-dev-external-secrets-policy]
+module.dns.aws_route53_zone.this: Still creating... [00m20s elapsed]
+module.iam.module.external_secrets.aws_iam_role_policy_attachment.managed[0]: Creating...
+module.argocd_iam.module.repo_server.aws_iam_policy.managed[0]: Creation complete after 1s [id=arn:aws:iam::125788629837:policy/platform-dev-argocd-repo-server-policy]
+module.argocd_iam.module.repo_server.aws_iam_role_policy_attachment.managed[0]: Creating...
+module.iam.module.external_secrets.aws_iam_role_policy_attachment.managed[0]: Creation complete after 1s [id=platform-dev-external-secrets/arn:aws:iam::125788629837:policy/platform-dev-external-secrets-policy]
+module.argocd_iam.module.repo_server.aws_iam_role_policy_attachment.managed[0]: Creation complete after 1s [id=platform-dev-argocd-repo-server/arn:aws:iam::125788629837:policy/platform-dev-argocd-repo-server-policy]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m10s elapsed]
+module.vpc.aws_nat_gateway.this[1]: Still creating... [00m10s elapsed]
+module.dns.aws_route53_zone.this: Still creating... [00m30s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m20s elapsed]
+module.vpc.aws_nat_gateway.this[1]: Still creating... [00m20s elapsed]
+module.dns.aws_route53_zone.this: Still creating... [00m40s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m30s elapsed]
+module.vpc.aws_nat_gateway.this[1]: Still creating... [00m30s elapsed]
+module.dns.aws_route53_zone.this: Still creating... [00m50s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m40s elapsed]
+module.vpc.aws_nat_gateway.this[1]: Still creating... [00m40s elapsed]
+module.dns.aws_route53_zone.this: Still creating... [01m00s elapsed]
+module.dns.aws_route53_zone.this: Creation complete after 1m5s [id=Z10227831KOYKCH0ZZF41]
+module.iam.data.aws_iam_policy_document.cert_manager: Reading...
+module.iam.data.aws_iam_policy_document.external_dns: Reading...
+module.iam.module.cert_manager.aws_iam_role.this: Creating...
+module.iam.module.external_dns.aws_iam_role.this: Creating...
+module.iam.data.aws_iam_policy_document.cert_manager: Read complete after 0s [id=51567062]
+module.iam.data.aws_iam_policy_document.external_dns: Read complete after 0s [id=1155421198]
+module.iam.module.external_dns.aws_iam_policy.managed[0]: Creating...
+module.iam.module.cert_manager.aws_iam_policy.managed[0]: Creating...
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m50s elapsed]
+module.vpc.aws_nat_gateway.this[1]: Still creating... [00m50s elapsed]
+module.iam.module.external_dns.aws_iam_policy.managed[0]: Creation complete after 1s [id=arn:aws:iam::125788629837:policy/platform-dev-external-dns-policy]
+module.iam.module.cert_manager.aws_iam_policy.managed[0]: Creation complete after 1s [id=arn:aws:iam::125788629837:policy/platform-dev-cert-manager-policy]
+module.iam.module.external_dns.aws_iam_role.this: Creation complete after 1s [id=platform-dev-external-dns]
+module.iam.module.external_dns.aws_iam_role_policy_attachment.managed[0]: Creating...
+module.iam.module.cert_manager.aws_iam_role.this: Creation complete after 1s [id=platform-dev-cert-manager]
+module.iam.module.cert_manager.aws_iam_role_policy_attachment.managed[0]: Creating...
+module.iam.module.external_dns.aws_iam_role_policy_attachment.managed[0]: Creation complete after 1s [id=platform-dev-external-dns/arn:aws:iam::125788629837:policy/platform-dev-external-dns-policy]
+module.iam.module.cert_manager.aws_iam_role_policy_attachment.managed[0]: Creation complete after 1s [id=platform-dev-cert-manager/arn:aws:iam::125788629837:policy/platform-dev-cert-manager-policy]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [01m00s elapsed]
+module.vpc.aws_nat_gateway.this[1]: Still creating... [01m00s elapsed]
+module.vpc.aws_nat_gateway.this[1]: Creation complete after 1m8s [id=nat-05381ed15569f367f]
+module.vpc.aws_nat_gateway.this[0]: Creation complete after 1m9s [id=nat-00748867c59e27166]
+module.vpc.aws_route.private_default[2]: Creating...
+module.vpc.aws_route.private_default[1]: Creating...
+module.vpc.aws_route.private_default[0]: Creating...
+module.vpc.aws_route.private_default[2]: Creation complete after 1s [id=r-rtb-034b951bbae5002ca1080289494]
+module.vpc.aws_route.private_default[1]: Creation complete after 7s [id=r-rtb-04953a53caf784fef1080289494]
+module.vpc.aws_route.private_default[0]: Creation complete after 7s [id=r-rtb-075aeab763c38006a1080289494]
+Releasing state lock. This may take a few moments...
+
+Apply complete! Resources: 61 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+argocd_role_arn = "arn:aws:iam::125788629837:role/platform-dev-argocd-repo-server"
+bastion_private_key_path = "./.ssh/id_ed25519"
+bastion_public_key = <<EOT
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE6hXq16KkV9rOFdKAmOnfcTDooR0WPrGC2FlyGyqcIP
+
+EOT
+hosted_zone_id = "Z10227831KOYKCH0ZZF41"
+hosted_zone_name = "corp.example.internal"
+irsa_role_arns = {
+  "aws-load-balancer-controller" = "arn:aws:iam::125788629837:role/platform-dev-aws-lbc"
+  "cert-manager" = "arn:aws:iam::125788629837:role/platform-dev-cert-manager"
+  "cluster-autoscaler" = "arn:aws:iam::125788629837:role/platform-dev-cluster-autoscaler"
+  "ebs-csi-controller" = "arn:aws:iam::125788629837:role/platform-dev-ebs-csi"
+  "external-dns" = "arn:aws:iam::125788629837:role/platform-dev-external-dns"
+  "external-secrets" = "arn:aws:iam::125788629837:role/platform-dev-external-secrets"
+}
+kms_key_alias = "alias/platform-dev"
+kms_key_arn = "arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c"
+kops_cluster_inputs = {
+  "additional_policies" = {
+    "control-plane" = "[{\"Action\":[\"ssmmessages:OpenDataChannel\",\"ssmmessages:OpenControlChannel\",\"ssmmessages:CreateDataChannel\",\"ssmmessages:CreateControlChannel\",\"ssm:UpdateInstanceInformation\",\"ec2messages:SendReply\",\"ec2messages:GetMessages\",\"ec2messages:GetEndpoint\",\"ec2messages:FailMessage\",\"ec2messages:DeleteMessage\",\"ec2messages:AcknowledgeMessage\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"SsmSessionManager\"},{\"Action\":[\"kms:ReEncrypt*\",\"kms:GenerateDataKey*\",\"kms:Encrypt\",\"kms:DescribeKey\",\"kms:Decrypt\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c\",\"Sid\":\"EtcdVolumeEncryption\"},{\"Action\":\"kms:CreateGrant\",\"Condition\":{\"Bool\":{\"kms:GrantIsForAWSResource\":\"true\"}},\"Effect\":\"Allow\",\"Resource\":\"arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c\",\"Sid\":\"CreateGrantForEtcdVolumes\"},{\"Action\":[\"s3:PutObjectAcl\",\"s3:PutObject\",\"s3:ListBucket\",\"s3:GetObject\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:s3:::platform-dev-oidc-eun1-125788629837/*\",\"arn:aws:s3:::platform-dev-oidc-eun1-125788629837\"],\"Sid\":\"PublishOidcDiscovery\"}]"
+    "node" = "[{\"Action\":[\"ssmmessages:OpenDataChannel\",\"ssmmessages:OpenControlChannel\",\"ssmmessages:CreateDataChannel\",\"ssmmessages:CreateControlChannel\",\"ssm:UpdateInstanceInformation\",\"ssm:ListInstanceAssociations\",\"ssm:ListAssociations\",\"ec2messages:SendReply\",\"ec2messages:GetMessages\",\"ec2messages:GetEndpoint\",\"ec2messages:FailMessage\",\"ec2messages:DeleteMessage\",\"ec2messages:AcknowledgeMessage\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"SsmSessionManager\"},{\"Action\":[\"ec2:DescribeTags\",\"ec2:DescribeInstances\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"DescribeTags\"},{\"Action\":[\"kms:GenerateDataKeyWithoutPlaintext\",\"kms:DescribeKey\",\"kms:Decrypt\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c\",\"Sid\":\"UsePlatformKey\"},{\"Action\":\"s3:GetObject\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:s3:::platform-dev-oidc-eun1-125788629837/*\",\"Sid\":\"ReadOidcDiscovery\"}]"
+  }
+  "argocd_role_arn" = "arn:aws:iam::125788629837:role/platform-dev-argocd-repo-server"
+  "azs" = tolist([
+    "eu-north-1a",
+    "eu-north-1b",
+    "eu-north-1c",
+  ])
+  "cluster_name" = "dev.k8s.local"
+  "hosted_zone_id" = "Z10227831KOYKCH0ZZF41"
+  "hosted_zone_name" = "corp.example.internal"
+  "irsa_role_arns" = {
+    "aws-load-balancer-controller" = "arn:aws:iam::125788629837:role/platform-dev-aws-lbc"
+    "cert-manager" = "arn:aws:iam::125788629837:role/platform-dev-cert-manager"
+    "cluster-autoscaler" = "arn:aws:iam::125788629837:role/platform-dev-cluster-autoscaler"
+    "ebs-csi-controller" = "arn:aws:iam::125788629837:role/platform-dev-ebs-csi"
+    "external-dns" = "arn:aws:iam::125788629837:role/platform-dev-external-dns"
+    "external-secrets" = "arn:aws:iam::125788629837:role/platform-dev-external-secrets"
+  }
+  "kms_key_arn" = "arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c"
+  "oidc_discovery_store" = "s3://platform-dev-oidc-eun1-125788629837"
+  "oidc_issuer_url" = "https://platform-dev-oidc-eun1-125788629837.s3.eu-north-1.amazonaws.com"
+  "oidc_jwks_uri" = "https://platform-dev-oidc-eun1-125788629837.s3.eu-north-1.amazonaws.com/openid/v1/jwks"
+  "private_subnets" = {
+    "eu-north-1a" = "subnet-09fdf972ec95dac5e"
+    "eu-north-1b" = "subnet-0c04e4238dd4494d9"
+    "eu-north-1c" = "subnet-07817c9d6a824144e"
+  }
+  "public_subnets" = {
+    "eu-north-1a" = "subnet-0eeb5637ec567e4e9"
+    "eu-north-1b" = "subnet-021172b46316df8eb"
+    "eu-north-1c" = "subnet-0bc3aaf2632ea291b"
+  }
+  "region" = "eu-north-1"
+  "ssh_public_key" = <<-EOT
+  ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE6hXq16KkV9rOFdKAmOnfcTDooR0WPrGC2FlyGyqcIP
+  
+  EOT
+  "vpc_cidr" = "10.20.0.0/16"
+  "vpc_id" = "vpc-0f9f899fb457031b8"
+}
+nat_public_ips = [
+  "13.49.187.232",
+  "13.63.95.222",
+]
+oidc_discovery_store = "s3://platform-dev-oidc-eun1-125788629837"
+oidc_issuer_hostname = "platform-dev-oidc-eun1-125788629837.s3.eu-north-1.amazonaws.com"
+oidc_issuer_url = "https://platform-dev-oidc-eun1-125788629837.s3.eu-north-1.amazonaws.com"
+oidc_jwks_uri = "https://platform-dev-oidc-eun1-125788629837.s3.eu-north-1.amazonaws.com/openid/v1/jwks"
+oidc_provider_arn = "arn:aws:iam::125788629837:oidc-provider/platform-dev-oidc-eun1-125788629837.s3.eu-north-1.amazonaws.com"
+private_subnet_ids = [
+  "subnet-09fdf972ec95dac5e",
+  "subnet-0c04e4238dd4494d9",
+  "subnet-07817c9d6a824144e",
+]
+private_subnets_by_az = {
+  "eu-north-1a" = "subnet-09fdf972ec95dac5e"
+  "eu-north-1b" = "subnet-0c04e4238dd4494d9"
+  "eu-north-1c" = "subnet-07817c9d6a824144e"
+}
+public_subnet_ids = [
+  "subnet-0eeb5637ec567e4e9",
+  "subnet-021172b46316df8eb",
+  "subnet-0bc3aaf2632ea291b",
+]
+public_subnets_by_az = {
+  "eu-north-1a" = "subnet-0eeb5637ec567e4e9"
+  "eu-north-1b" = "subnet-021172b46316df8eb"
+  "eu-north-1c" = "subnet-0bc3aaf2632ea291b"
+}
+vpc_cidr_block = "10.20.0.0/16"
+vpc_id = "vpc-0f9f899fb457031b8"

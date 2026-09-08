@@ -1,0 +1,568 @@
+
+PLAY [Create or reconcile the kOps cluster] ************************************
+Monday 07 September 2026  11:03:17 +0000 (0:00:00.027)       0:00:00.027 ****** 
+
+TASK [Gathering Facts] *********************************************************
+ok: [localhost]
+Monday 07 September 2026  11:03:18 +0000 (0:00:01.595)       0:00:01.622 ****** 
+
+TASK [Verify the toolchain is present] *****************************************
+ok: [localhost] => (item=kops)
+ok: [localhost] => (item=terraform)
+Monday 07 September 2026  11:03:20 +0000 (0:00:01.674)       0:00:03.297 ****** 
+
+TASK [Verify AWS credentials] **************************************************
+ok: [localhost]
+Monday 07 September 2026  11:03:23 +0000 (0:00:03.010)       0:00:06.308 ****** 
+
+TASK [kops_cluster : Ensure build directory exists] ****************************
+ok: [localhost]
+Monday 07 September 2026  11:03:23 +0000 (0:00:00.346)       0:00:06.654 ****** 
+
+TASK [kops_cluster : Read Terraform outputs from the dev stack] ****************
+ok: [localhost]
+Monday 07 September 2026  11:03:35 +0000 (0:00:11.540)       0:00:18.195 ****** 
+
+TASK [kops_cluster : Bind Terraform outputs to a fact] *************************
+ok: [localhost]
+Monday 07 September 2026  11:03:35 +0000 (0:00:00.047)       0:00:18.243 ****** 
+
+TASK [kops_cluster : Sanity-check the Terraform contract] **********************
+ok: [localhost] => {
+    "changed": false,
+    "msg": "Terraform contract satisfied for VPC vpc-0f9f899fb457031b8"
+}
+Monday 07 September 2026  11:03:35 +0000 (0:00:00.049)       0:00:18.292 ****** 
+
+TASK [kops_cluster : Detect the operator's public egress address] **************
+ok: [localhost]
+Monday 07 September 2026  11:03:36 +0000 (0:00:00.953)       0:00:19.246 ****** 
+
+TASK [kops_cluster : Derive the operator CIDR] *********************************
+ok: [localhost]
+Monday 07 September 2026  11:03:36 +0000 (0:00:00.032)       0:00:19.278 ****** 
+
+TASK [kops_cluster : Report the access allow-list] *****************************
+ok: [localhost] => {
+    "msg": "Kubernetes API and SSH will be restricted to 59.92.35.231/32. If your egress address changes, re-run this playbook to update the security groups."
+}
+Monday 07 September 2026  11:03:36 +0000 (0:00:00.023)       0:00:19.302 ****** 
+
+TASK [kops_cluster : Render the cluster manifest] ******************************
+changed: [localhost]
+Monday 07 September 2026  11:03:37 +0000 (0:00:00.726)       0:00:20.028 ****** 
+
+TASK [kops_cluster : Render the instance group manifests] **********************
+ok: [localhost]
+Monday 07 September 2026  11:03:37 +0000 (0:00:00.458)       0:00:20.486 ****** 
+
+TASK [kops_cluster : Confirm the rendered manifests are valid, non-empty YAML documents] ***
+ok: [localhost]
+Monday 07 September 2026  11:03:37 +0000 (0:00:00.216)       0:00:20.703 ****** 
+
+TASK [kops_cluster : Manifest validation result] *******************************
+ok: [localhost] => {
+    "msg": [
+        "/root/DevOps-Assignment/cluster-ops/playbooks/../build/cluster.yaml: 1 valid document(s): Cluster/dev.k8s.local",
+        "/root/DevOps-Assignment/cluster-ops/playbooks/../build/instancegroups.yaml: 6 valid document(s): InstanceGroup/control-plane-eu-north-1a, InstanceGroup/control-plane-eu-north-1b, InstanceGroup/control-plane-eu-north-1c, InstanceGroup/nodes-ondemand, InstanceGroup/nodes-spot, InstanceGroup/bastion"
+    ]
+}
+Monday 07 September 2026  11:03:38 +0000 (0:00:00.022)       0:00:20.725 ****** 
+
+TASK [kops_cluster : Check whether the cluster already exists in the state store] ***
+ok: [localhost]
+Monday 07 September 2026  11:03:40 +0000 (0:00:02.459)       0:00:23.185 ****** 
+
+TASK [kops_cluster : Register whether this is a first creation] ****************
+ok: [localhost]
+Monday 07 September 2026  11:03:40 +0000 (0:00:00.022)       0:00:23.207 ****** 
+Monday 07 September 2026  11:03:40 +0000 (0:00:00.035)       0:00:23.242 ****** 
+
+TASK [kops_cluster : Reconcile the cluster specification with the rendered manifests] ***
+changed: [localhost] => (item=cluster.yaml)
+changed: [localhost] => (item=instancegroups.yaml)
+Monday 07 September 2026  11:03:54 +0000 (0:00:13.565)       0:00:36.808 ****** 
+
+TASK [kops_cluster : Check for an existing SSH public key secret] **************
+ok: [localhost]
+Monday 07 September 2026  11:03:55 +0000 (0:00:01.614)       0:00:38.422 ****** 
+
+TASK [kops_cluster : Write the Terraform-generated SSH public key to disk] *****
+ok: [localhost]
+Monday 07 September 2026  11:03:56 +0000 (0:00:00.409)       0:00:38.832 ****** 
+
+TASK [kops_cluster : Register the SSH public key with kOps] ********************
+changed: [localhost]
+Monday 07 September 2026  11:03:57 +0000 (0:00:01.713)       0:00:40.545 ****** 
+
+TASK [kops_cluster : Look for an existing encryption config secret] ************
+ok: [localhost]
+Monday 07 September 2026  11:03:57 +0000 (0:00:00.027)       0:00:40.572 ****** 
+
+TASK [kops_cluster : Generate an aescbc key for etcd secret encryption] ********
+ok: [localhost]
+Monday 07 September 2026  11:03:57 +0000 (0:00:00.038)       0:00:40.611 ****** 
+
+TASK [kops_cluster : Render the EncryptionConfiguration] ***********************
+ok: [localhost]
+Monday 07 September 2026  11:03:58 +0000 (0:00:00.409)       0:00:41.021 ****** 
+
+TASK [kops_cluster : Register the EncryptionConfiguration with kOps] ***********
+ok: [localhost]
+Monday 07 September 2026  11:03:59 +0000 (0:00:01.464)       0:00:42.485 ****** 
+
+TASK [kops_cluster : Show the pending infrastructure diff] *********************
+ok: [localhost]
+Monday 07 September 2026  11:04:46 +0000 (0:00:46.992)       0:01:29.478 ****** 
+
+TASK [kops_cluster : Pending changes] ******************************************
+ok: [localhost] => {
+    "kops_diff.stdout_lines": [
+        "",
+        "*********************************************************************************",
+        "",
+        "A new kubernetes version is available: 1.34.11",
+        "Upgrading is recommended (try kops upgrade cluster)",
+        "",
+        "More information: https://github.com/kubernetes/kops/blob/master/permalinks/upgrade_k8s.md#1.34.11",
+        "",
+        "*********************************************************************************",
+        "",
+        "Will modify resources:",
+        "  LaunchTemplate/control-plane-eu-north-1a.masters.dev.k8s.local",
+        "  \tUserData            ",
+        "  \t                    \t...",
+        "  \t                    \t  InstanceGroupName: control-plane-eu-north-1a",
+        "  \t                    \t  InstanceGroupRole: ControlPlane",
+        "  \t                    \t+ NodeupConfigHash: sIzti3yPuzV3vBnIeoxp1g69EkxiCtik+KMMKDGa43U=",
+        "  \t                    \t- NodeupConfigHash: ccaFt7tAEW0FaCs9wrAfC3nAp34PP52R0j0A/JkP5ak=",
+        "  \t                    \t  ",
+        "  \t                    \t  __EOF_KUBE_ENV",
+        "  \t                    \t...",
+        "  \t                    \t",
+        "",
+        "  LaunchTemplate/control-plane-eu-north-1b.masters.dev.k8s.local",
+        "  \tUserData            ",
+        "  \t                    \t...",
+        "  \t                    \t  InstanceGroupName: control-plane-eu-north-1b",
+        "  \t                    \t  InstanceGroupRole: ControlPlane",
+        "  \t                    \t+ NodeupConfigHash: lm+F942bU/frBCqGvFNxZtYZ0wu+EhQfLAajMEvCrfE=",
+        "  \t                    \t- NodeupConfigHash: yOH99NWZRU7fkYXB/GVyePrTAa3P+j+e1dT3eIGAt1Y=",
+        "  \t                    \t  ",
+        "  \t                    \t  __EOF_KUBE_ENV",
+        "  \t                    \t...",
+        "  \t                    \t",
+        "",
+        "  LaunchTemplate/control-plane-eu-north-1c.masters.dev.k8s.local",
+        "  \tUserData            ",
+        "  \t                    \t...",
+        "  \t                    \t  InstanceGroupName: control-plane-eu-north-1c",
+        "  \t                    \t  InstanceGroupRole: ControlPlane",
+        "  \t                    \t+ NodeupConfigHash: MJv/AljSCuW68HVmpDdIIMVcyBIxs30rnjphBbykHh4=",
+        "  \t                    \t- NodeupConfigHash: ztYVZGIx9DL5Sq1DBKtakj/5Z+REH43O4GUQS2OllDk=",
+        "  \t                    \t  ",
+        "  \t                    \t  __EOF_KUBE_ENV",
+        "  \t                    \t...",
+        "  \t                    \t",
+        "",
+        "  LaunchTemplate/nodes-ondemand.dev.k8s.local",
+        "  \tUserData            ",
+        "  \t                    \t...",
+        "  \t                    \t  InstanceGroupName: nodes-ondemand",
+        "  \t                    \t  InstanceGroupRole: Node",
+        "  \t                    \t+ NodeupConfigHash: ya3BbSAEivS1KGZPRsOVqJO5WB2dTqk6SKhC0rK29Nc=",
+        "  \t                    \t- NodeupConfigHash: 5RWsgHXW8Pe2OuKNbnGMIYnVJvCb58YQBKBbeoiFM9M=",
+        "  \t                    \t  ",
+        "  \t                    \t  __EOF_KUBE_ENV",
+        "  \t                    \t...",
+        "  \t                    \t",
+        "",
+        "  LaunchTemplate/nodes-spot.dev.k8s.local",
+        "  \tUserData            ",
+        "  \t                    \t...",
+        "  \t                    \t  InstanceGroupName: nodes-spot",
+        "  \t                    \t  InstanceGroupRole: Node",
+        "  \t                    \t+ NodeupConfigHash: Q2KMUq3SWkPU/S0W1KJrMn4Acr+oFeTxrOcYHc2EYfE=",
+        "  \t                    \t- NodeupConfigHash: vpJDGi65LXTHr9gBgsz46Diy2JvWCGNc1Zv7kDUJzY4=",
+        "  \t                    \t  ",
+        "  \t                    \t  __EOF_KUBE_ENV",
+        "  \t                    \t...",
+        "  \t                    \t",
+        "",
+        "  ManagedFile/cluster-completed.spec",
+        "  \tContents            ",
+        "  \t                    \t...",
+        "  \t                    \t  kind: Cluster",
+        "  \t                    \t  metadata:",
+        "  \t                    \t+   generation: 1",
+        "  \t                    \t    name: dev.k8s.local",
+        "  \t                    \t  spec:",
+        "  \t                    \t...",
+        "  \t                    \t      logLevel: 2",
+        "  \t                    \t    kubelet:",
+        "  \t                    \t+     anonymousAuth: false",
+        "  \t                    \t+     authenticationTokenWebhook: true",
+        "  \t                    \t+     authorizationMode: Webhook",
+        "  \t                    \t      cgroupDriver: systemd",
+        "  \t                    \t      cgroupRoot: /",
+        "  \t                    \t...",
+        "  \t                    \t      clusterDomain: cluster.local",
+        "  \t                    \t      enableDebuggingHandlers: true",
+        "  \t                    \t+     evictionHard: memory.available<200Mi,nodefs.available<10%",
+        "  \t                    \t+     kubeReserved:",
+        "  \t                    \t+       cpu: 100m",
+        "  \t                    \t+       memory: 256Mi",
+        "  \t                    \t-     evictionHard: memory.available<100Mi,nodefs.available<10%,nodefs.inodesFree<5%,imagefs.available<10%,imagefs.inodesFree<5%",
+        "  \t                    \t      kubeconfigPath: /var/lib/kubelet/kubeconfig",
+        "  \t                    \t      logLevel: 2",
+        "  \t                    \t...",
+        "  \t                    \t      shutdownGracePeriod: 30s",
+        "  \t                    \t      shutdownGracePeriodCriticalPods: 10s",
+        "  \t                    \t+     systemReserved:",
+        "  \t                    \t+       cpu: 100m",
+        "  \t                    \t+       memory: 256Mi",
+        "  \t                    \t    kubernetesApiAccess:",
+        "  \t                    \t    - 59.92.35.231/32",
+        "  \t                    \t    kubernetesVersion: 1.34.10",
+        "  \t                    \t    masterKubelet:",
+        "  \t                    \t+     anonymousAuth: false",
+        "  \t                    \t+     authenticationTokenWebhook: true",
+        "  \t                    \t+     authorizationMode: Webhook",
+        "  \t                    \t      cgroupDriver: systemd",
+        "  \t                    \t      cgroupRoot: /",
+        "  \t                    \t...",
+        "  \t                    \t      clusterDomain: cluster.local",
+        "  \t                    \t      enableDebuggingHandlers: true",
+        "  \t                    \t-     evictionHard: memory.available<100Mi,nodefs.available<10%,nodefs.inodesFree<5%,imagefs.available<10%,imagefs.inodesFree<5%",
+        "  \t                    \t-     featureGates:",
+        "  \t                    \t+     evictionHard: memory.available<200Mi,nodefs.available<10%",
+        "  \t                    \t+     featureGates:",
+        "  \t                    \t+       ImageVolume: \"true\"",
+        "  \t                    \t+     kubeReserved:",
+        "  \t                    \t+       cpu: 100m",
+        "  \t                    \t+       memory: 256Mi",
+        "  \t                    \t-       ImageVolume: \"true\"",
+        "  \t                    \t      kubeconfigPath: /var/lib/kubelet/kubeconfig",
+        "  \t                    \t      logLevel: 2",
+        "  \t                    \t...",
+        "  \t                    \t      shutdownGracePeriod: 30s",
+        "  \t                    \t      shutdownGracePeriodCriticalPods: 10s",
+        "  \t                    \t+     systemReserved:",
+        "  \t                    \t+       cpu: 100m",
+        "  \t                    \t+       memory: 256Mi",
+        "  \t                    \t    metricsServer:",
+        "  \t                    \t      enabled: true",
+        "  \t                    \t...",
+        "  \t                    \t",
+        "",
+        "  ManagedFile/nodeupconfig-control-plane-eu-north-1a",
+        "  \tContents            ",
+        "  \t                    \t...",
+        "  \t                    \t    logLevel: 2",
+        "  \t                    \t  KubeletConfig:",
+        "  \t                    \t+   anonymousAuth: false",
+        "  \t                    \t+   authenticationTokenWebhook: true",
+        "  \t                    \t+   authorizationMode: Webhook",
+        "  \t                    \t    cgroupDriver: systemd",
+        "  \t                    \t    cgroupRoot: /",
+        "  \t                    \t...",
+        "  \t                    \t    clusterDomain: cluster.local",
+        "  \t                    \t    enableDebuggingHandlers: true",
+        "  \t                    \t-   evictionHard: memory.available<100Mi,nodefs.available<10%,nodefs.inodesFree<5%,imagefs.available<10%,imagefs.inodesFree<5%",
+        "  \t                    \t-   featureGates:",
+        "  \t                    \t+   evictionHard: memory.available<200Mi,nodefs.available<10%",
+        "  \t                    \t+   featureGates:",
+        "  \t                    \t+     ImageVolume: \"true\"",
+        "  \t                    \t+   kubeReserved:",
+        "  \t                    \t+     cpu: 100m",
+        "  \t                    \t+     memory: 256Mi",
+        "  \t                    \t-     ImageVolume: \"true\"",
+        "  \t                    \t    kubeconfigPath: /var/lib/kubelet/kubeconfig",
+        "  \t                    \t    logLevel: 2",
+        "  \t                    \t...",
+        "  \t                    \t    shutdownGracePeriod: 30s",
+        "  \t                    \t    shutdownGracePeriodCriticalPods: 10s",
+        "  \t                    \t+   systemReserved:",
+        "  \t                    \t+     cpu: 100m",
+        "  \t                    \t+     memory: 256Mi",
+        "  \t                    \t    taints:",
+        "  \t                    \t    - node-role.kubernetes.io/control-plane=:NoSchedule",
+        "  \t                    \t...",
+        "  \t                    \t",
+        "",
+        "  ManagedFile/nodeupconfig-control-plane-eu-north-1b",
+        "  \tContents            ",
+        "  \t                    \t...",
+        "  \t                    \t    logLevel: 2",
+        "  \t                    \t  KubeletConfig:",
+        "  \t                    \t+   anonymousAuth: false",
+        "  \t                    \t+   authenticationTokenWebhook: true",
+        "  \t                    \t+   authorizationMode: Webhook",
+        "  \t                    \t    cgroupDriver: systemd",
+        "  \t                    \t    cgroupRoot: /",
+        "  \t                    \t...",
+        "  \t                    \t    clusterDomain: cluster.local",
+        "  \t                    \t    enableDebuggingHandlers: true",
+        "  \t                    \t-   evictionHard: memory.available<100Mi,nodefs.available<10%,nodefs.inodesFree<5%,imagefs.available<10%,imagefs.inodesFree<5%",
+        "  \t                    \t-   featureGates:",
+        "  \t                    \t+   evictionHard: memory.available<200Mi,nodefs.available<10%",
+        "  \t                    \t+   featureGates:",
+        "  \t                    \t+     ImageVolume: \"true\"",
+        "  \t                    \t+   kubeReserved:",
+        "  \t                    \t+     cpu: 100m",
+        "  \t                    \t+     memory: 256Mi",
+        "  \t                    \t-     ImageVolume: \"true\"",
+        "  \t                    \t    kubeconfigPath: /var/lib/kubelet/kubeconfig",
+        "  \t                    \t    logLevel: 2",
+        "  \t                    \t...",
+        "  \t                    \t    shutdownGracePeriod: 30s",
+        "  \t                    \t    shutdownGracePeriodCriticalPods: 10s",
+        "  \t                    \t+   systemReserved:",
+        "  \t                    \t+     cpu: 100m",
+        "  \t                    \t+     memory: 256Mi",
+        "  \t                    \t    taints:",
+        "  \t                    \t    - node-role.kubernetes.io/control-plane=:NoSchedule",
+        "  \t                    \t...",
+        "  \t                    \t",
+        "",
+        "  ManagedFile/nodeupconfig-control-plane-eu-north-1c",
+        "  \tContents            ",
+        "  \t                    \t...",
+        "  \t                    \t    logLevel: 2",
+        "  \t                    \t  KubeletConfig:",
+        "  \t                    \t+   anonymousAuth: false",
+        "  \t                    \t+   authenticationTokenWebhook: true",
+        "  \t                    \t+   authorizationMode: Webhook",
+        "  \t                    \t    cgroupDriver: systemd",
+        "  \t                    \t    cgroupRoot: /",
+        "  \t                    \t...",
+        "  \t                    \t    clusterDomain: cluster.local",
+        "  \t                    \t    enableDebuggingHandlers: true",
+        "  \t                    \t-   evictionHard: memory.available<100Mi,nodefs.available<10%,nodefs.inodesFree<5%,imagefs.available<10%,imagefs.inodesFree<5%",
+        "  \t                    \t-   featureGates:",
+        "  \t                    \t+   evictionHard: memory.available<200Mi,nodefs.available<10%",
+        "  \t                    \t+   featureGates:",
+        "  \t                    \t+     ImageVolume: \"true\"",
+        "  \t                    \t+   kubeReserved:",
+        "  \t                    \t+     cpu: 100m",
+        "  \t                    \t+     memory: 256Mi",
+        "  \t                    \t-     ImageVolume: \"true\"",
+        "  \t                    \t    kubeconfigPath: /var/lib/kubelet/kubeconfig",
+        "  \t                    \t    logLevel: 2",
+        "  \t                    \t...",
+        "  \t                    \t    shutdownGracePeriod: 30s",
+        "  \t                    \t    shutdownGracePeriodCriticalPods: 10s",
+        "  \t                    \t+   systemReserved:",
+        "  \t                    \t+     cpu: 100m",
+        "  \t                    \t+     memory: 256Mi",
+        "  \t                    \t    taints:",
+        "  \t                    \t    - node-role.kubernetes.io/control-plane=:NoSchedule",
+        "  \t                    \t...",
+        "  \t                    \t",
+        "",
+        "  ManagedFile/nodeupconfig-nodes-ondemand",
+        "  \tContents            ",
+        "  \t                    \t...",
+        "  \t                    \t    logLevel: 2",
+        "  \t                    \t  KubeletConfig:",
+        "  \t                    \t+   anonymousAuth: false",
+        "  \t                    \t+   authenticationTokenWebhook: true",
+        "  \t                    \t+   authorizationMode: Webhook",
+        "  \t                    \t    cgroupDriver: systemd",
+        "  \t                    \t    cgroupRoot: /",
+        "  \t                    \t...",
+        "  \t                    \t    clusterDomain: cluster.local",
+        "  \t                    \t    enableDebuggingHandlers: true",
+        "  \t                    \t+   evictionHard: memory.available<200Mi,nodefs.available<10%",
+        "  \t                    \t+   kubeReserved:",
+        "  \t                    \t+     cpu: 100m",
+        "  \t                    \t+     memory: 256Mi",
+        "  \t                    \t-   evictionHard: memory.available<100Mi,nodefs.available<10%,nodefs.inodesFree<5%,imagefs.available<10%,imagefs.inodesFree<5%",
+        "  \t                    \t    kubeconfigPath: /var/lib/kubelet/kubeconfig",
+        "  \t                    \t    logLevel: 2",
+        "  \t                    \t...",
+        "  \t                    \t    shutdownGracePeriod: 30s",
+        "  \t                    \t    shutdownGracePeriodCriticalPods: 10s",
+        "  \t                    \t+   systemReserved:",
+        "  \t                    \t+     cpu: 100m",
+        "  \t                    \t+     memory: 256Mi",
+        "  \t                    \t  KubernetesVersion: 1.34.10",
+        "  \t                    \t  Networking:",
+        "  \t                    \t...",
+        "  \t                    \t",
+        "",
+        "  ManagedFile/nodeupconfig-nodes-spot",
+        "  \tContents            ",
+        "  \t                    \t...",
+        "  \t                    \t    logLevel: 2",
+        "  \t                    \t  KubeletConfig:",
+        "  \t                    \t+   anonymousAuth: false",
+        "  \t                    \t+   authenticationTokenWebhook: true",
+        "  \t                    \t+   authorizationMode: Webhook",
+        "  \t                    \t    cgroupDriver: systemd",
+        "  \t                    \t    cgroupRoot: /",
+        "  \t                    \t...",
+        "  \t                    \t    clusterDomain: cluster.local",
+        "  \t                    \t    enableDebuggingHandlers: true",
+        "  \t                    \t+   evictionHard: memory.available<200Mi,nodefs.available<10%",
+        "  \t                    \t+   kubeReserved:",
+        "  \t                    \t+     cpu: 100m",
+        "  \t                    \t+     memory: 256Mi",
+        "  \t                    \t-   evictionHard: memory.available<100Mi,nodefs.available<10%,nodefs.inodesFree<5%,imagefs.available<10%,imagefs.inodesFree<5%",
+        "  \t                    \t    kubeconfigPath: /var/lib/kubelet/kubeconfig",
+        "  \t                    \t    logLevel: 2",
+        "  \t                    \t...",
+        "  \t                    \t    shutdownGracePeriod: 30s",
+        "  \t                    \t    shutdownGracePeriodCriticalPods: 10s",
+        "  \t                    \t+   systemReserved:",
+        "  \t                    \t+     cpu: 100m",
+        "  \t                    \t+     memory: 256Mi",
+        "  \t                    \t  KubernetesVersion: 1.34.10",
+        "  \t                    \t  Networking:",
+        "  \t                    \t...",
+        "  \t                    \t",
+        "",
+        "  Subnet/eu-north-1a.dev.k8s.local",
+        "  \tTags                \t {kubernetes.io/role/internal-elb: 1, kubernetes.io/cluster/dev.k8s.local: shared} -> {SubnetType: Private, kubernetes.io/role/internal-elb: 1, kubernetes.io/cluster/dev.k8s.local: shared}",
+        "",
+        "  Subnet/eu-north-1b.dev.k8s.local",
+        "  \tTags                \t {kubernetes.io/cluster/dev.k8s.local: shared, kubernetes.io/role/internal-elb: 1} -> {SubnetType: Private, kubernetes.io/role/internal-elb: 1, kubernetes.io/cluster/dev.k8s.local: shared}",
+        "",
+        "  Subnet/eu-north-1c.dev.k8s.local",
+        "  \tTags                \t {kubernetes.io/cluster/dev.k8s.local: shared, kubernetes.io/role/internal-elb: 1} -> {kubernetes.io/cluster/dev.k8s.local: shared, SubnetType: Private, kubernetes.io/role/internal-elb: 1}",
+        "",
+        "  Subnet/utility-eu-north-1a.dev.k8s.local",
+        "  \tTags                \t {kubernetes.io/cluster/dev.k8s.local: shared, kubernetes.io/role/elb: 1} -> {kubernetes.io/cluster/dev.k8s.local: shared, SubnetType: Utility, kubernetes.io/role/elb: 1}",
+        "",
+        "  Subnet/utility-eu-north-1b.dev.k8s.local",
+        "  \tTags                \t {kubernetes.io/cluster/dev.k8s.local: shared, kubernetes.io/role/elb: 1} -> {kubernetes.io/role/elb: 1, kubernetes.io/cluster/dev.k8s.local: shared, SubnetType: Utility}",
+        "",
+        "  Subnet/utility-eu-north-1c.dev.k8s.local",
+        "  \tTags                \t {kubernetes.io/role/elb: 1, kubernetes.io/cluster/dev.k8s.local: shared} -> {kubernetes.io/role/elb: 1, kubernetes.io/cluster/dev.k8s.local: shared, SubnetType: Utility}",
+        "",
+        "Must specify --yes to apply changes"
+    ]
+}
+Monday 07 September 2026  11:04:46 +0000 (0:00:00.033)       0:01:29.512 ****** 
+
+TASK [kops_cluster : Apply the cluster] ****************************************
+changed: [localhost]
+Monday 07 September 2026  11:05:35 +0000 (0:00:48.623)       0:02:18.135 ****** 
+
+TASK [kops_cluster : Export an admin kubeconfig] *******************************
+changed: [localhost]
+Monday 07 September 2026  11:05:39 +0000 (0:00:04.187)       0:02:22.322 ****** 
+
+TASK [kops_cluster : Wait for the cluster to become valid] *********************
+ok: [localhost]
+Monday 07 September 2026  11:06:27 +0000 (0:00:47.584)       0:03:09.907 ****** 
+
+TASK [kops_cluster : Validation result] ****************************************
+ok: [localhost] => {
+    "kops_validation.stdout_lines": [
+        "Validating cluster dev.k8s.local",
+        "",
+        "INSTANCE GROUPS",
+        "NAME\t\t\t\tROLE\t\tMACHINETYPE\tMIN\tMAX\tSUBNETS",
+        "bastion\t\t\t\tBastion\t\tt3.micro\t1\t1\tutility-eu-north-1a,utility-eu-north-1b,utility-eu-north-1c",
+        "control-plane-eu-north-1a\tControlPlane\tt3.medium\t1\t1\teu-north-1a",
+        "control-plane-eu-north-1b\tControlPlane\tt3.medium\t1\t1\teu-north-1b",
+        "control-plane-eu-north-1c\tControlPlane\tt3.medium\t1\t1\teu-north-1c",
+        "nodes-ondemand\t\t\tNode\t\tt3.large\t2\t4\teu-north-1a,eu-north-1b,eu-north-1c",
+        "nodes-spot\t\t\tNode\t\tt3.large\t2\t6\teu-north-1a,eu-north-1b,eu-north-1c",
+        "",
+        "NODE STATUS",
+        "NAME\t\t\tROLE\t\tREADY",
+        "i-013378707ef7e9719\tcontrol-plane\tTrue",
+        "i-03abd46c905e42c0e\tnode\t\tTrue",
+        "i-06760ff1926bc7eff\tnode\t\tTrue",
+        "i-06a46105aedb09d86\tnode\t\tTrue",
+        "i-07d0a9e1a5d2885c0\tnode\t\tTrue",
+        "i-0b8fdbe8df706f7c6\tcontrol-plane\tTrue",
+        "i-0f70cc465f12a3d1e\tcontrol-plane\tTrue",
+        "",
+        "Your cluster dev.k8s.local is ready",
+        "INSTANCE GROUPS",
+        "NAME\t\t\t\tROLE\t\tMACHINETYPE\tMIN\tMAX\tSUBNETS",
+        "bastion\t\t\t\tBastion\t\tt3.micro\t1\t1\tutility-eu-north-1a,utility-eu-north-1b,utility-eu-north-1c",
+        "control-plane-eu-north-1a\tControlPlane\tt3.medium\t1\t1\teu-north-1a",
+        "control-plane-eu-north-1b\tControlPlane\tt3.medium\t1\t1\teu-north-1b",
+        "control-plane-eu-north-1c\tControlPlane\tt3.medium\t1\t1\teu-north-1c",
+        "nodes-ondemand\t\t\tNode\t\tt3.large\t2\t4\teu-north-1a,eu-north-1b,eu-north-1c",
+        "nodes-spot\t\t\tNode\t\tt3.large\t2\t6\teu-north-1a,eu-north-1b,eu-north-1c",
+        "",
+        "NODE STATUS",
+        "NAME\t\t\tROLE\t\tREADY",
+        "i-013378707ef7e9719\tcontrol-plane\tTrue",
+        "i-03abd46c905e42c0e\tnode\t\tTrue",
+        "i-06760ff1926bc7eff\tnode\t\tTrue",
+        "i-06a46105aedb09d86\tnode\t\tTrue",
+        "i-07d0a9e1a5d2885c0\tnode\t\tTrue",
+        "i-0b8fdbe8df706f7c6\tcontrol-plane\tTrue",
+        "i-0f70cc465f12a3d1e\tcontrol-plane\tTrue",
+        "",
+        "Your cluster dev.k8s.local is ready",
+        "INSTANCE GROUPS",
+        "NAME\t\t\t\tROLE\t\tMACHINETYPE\tMIN\tMAX\tSUBNETS",
+        "bastion\t\t\t\tBastion\t\tt3.micro\t1\t1\tutility-eu-north-1a,utility-eu-north-1b,utility-eu-north-1c",
+        "control-plane-eu-north-1a\tControlPlane\tt3.medium\t1\t1\teu-north-1a",
+        "control-plane-eu-north-1b\tControlPlane\tt3.medium\t1\t1\teu-north-1b",
+        "control-plane-eu-north-1c\tControlPlane\tt3.medium\t1\t1\teu-north-1c",
+        "nodes-ondemand\t\t\tNode\t\tt3.large\t2\t4\teu-north-1a,eu-north-1b,eu-north-1c",
+        "nodes-spot\t\t\tNode\t\tt3.large\t2\t6\teu-north-1a,eu-north-1b,eu-north-1c",
+        "",
+        "NODE STATUS",
+        "NAME\t\t\tROLE\t\tREADY",
+        "i-013378707ef7e9719\tcontrol-plane\tTrue",
+        "i-03abd46c905e42c0e\tnode\t\tTrue",
+        "i-06760ff1926bc7eff\tnode\t\tTrue",
+        "i-06a46105aedb09d86\tnode\t\tTrue",
+        "i-07d0a9e1a5d2885c0\tnode\t\tTrue",
+        "i-0b8fdbe8df706f7c6\tcontrol-plane\tTrue",
+        "i-0f70cc465f12a3d1e\tcontrol-plane\tTrue",
+        "",
+        "Your cluster dev.k8s.local is ready"
+    ]
+}
+Monday 07 September 2026  11:06:27 +0000 (0:00:00.036)       0:03:09.944 ****** 
+
+TASK [Fetch the API server endpoint kOps wrote into kubeconfig] ****************
+ok: [localhost]
+Monday 07 September 2026  11:06:28 +0000 (0:00:00.848)       0:03:10.792 ****** 
+
+TASK [Fetch nodes] *************************************************************
+ok: [localhost]
+Monday 07 September 2026  11:06:29 +0000 (0:00:01.645)       0:03:12.437 ****** 
+
+TASK [Cluster summary] *********************************************************
+ok: [localhost] => {
+    "msg": "Cluster:  dev.k8s.local\nVersion:  1.34.10\nAPI:      https://api-dev-k8s-local-725b01-e30ed0097cc79ff6.elb.eu-north-1.amazonaws.com\n\nNote the API endpoint is an AWS-assigned NLB hostname, not a domain we\nown. That is None-DNS working as intended.\n\nNAME                  STATUS   ROLES              AGE    VERSION    INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION    CONTAINER-RUNTIME\ni-013378707ef7e9719   Ready    control-plane      3h2m   v1.34.10   10.20.52.180   <none>        Ubuntu 24.04.4 LTS   6.17.0-1019-aws   containerd://2.2.4\ni-03abd46c905e42c0e   Ready    node,spot-worker   3h1m   v1.34.10   10.20.80.11    <none>        Ubuntu 24.04.4 LTS   6.17.0-1019-aws   containerd://2.2.4\ni-06760ff1926bc7eff   Ready    node               3h1m   v1.34.10   10.20.22.52    <none>        Ubuntu 24.04.4 LTS   6.17.0-1019-aws   containerd://2.2.4\ni-06a46105aedb09d86   Ready    node,spot-worker   3h1m   v1.34.10   10.20.25.35    <none>        Ubuntu 24.04.4 LTS   6.17.0-1019-aws   containerd://2.2.4\ni-07d0a9e1a5d2885c0   Ready    node               3h1m   v1.34.10   10.20.81.238   <none>        Ubuntu 24.04.4 LTS   6.17.0-1019-aws   containerd://2.2.4\ni-0b8fdbe8df706f7c6   Ready    control-plane      3h2m   v1.34.10   10.20.8.201    <none>        Ubuntu 24.04.4 LTS   6.17.0-1019-aws   containerd://2.2.4\ni-0f70cc465f12a3d1e   Ready    control-plane      3h2m   v1.34.10   10.20.68.4     <none>        Ubuntu 24.04.4 LTS   6.17.0-1019-aws   containerd://2.2.4\n"
+}
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=33   changed=5    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+
+
+TASKS RECAP ********************************************************************
+Monday 07 September 2026  11:06:29 +0000 (0:00:00.021)       0:03:12.459 ****** 
+=============================================================================== 
+kops_cluster : Apply the cluster --------------------------------------- 48.62s
+kops_cluster : Wait for the cluster to become valid -------------------- 47.58s
+kops_cluster : Show the pending infrastructure diff -------------------- 46.99s
+kops_cluster : Reconcile the cluster specification with the rendered manifests -- 13.57s
+kops_cluster : Read Terraform outputs from the dev stack --------------- 11.54s
+kops_cluster : Export an admin kubeconfig ------------------------------- 4.19s
+Verify AWS credentials -------------------------------------------------- 3.01s
+kops_cluster : Check whether the cluster already exists in the state store --- 2.46s
+kops_cluster : Register the SSH public key with kOps -------------------- 1.71s
+Verify the toolchain is present ----------------------------------------- 1.67s
+Fetch nodes ------------------------------------------------------------- 1.65s
+kops_cluster : Check for an existing SSH public key secret -------------- 1.61s
+Gathering Facts --------------------------------------------------------- 1.60s
+kops_cluster : Register the EncryptionConfiguration with kOps ----------- 1.46s
+kops_cluster : Detect the operator's public egress address -------------- 0.95s
+Fetch the API server endpoint kOps wrote into kubeconfig ---------------- 0.85s
+kops_cluster : Render the cluster manifest ------------------------------ 0.73s
+kops_cluster : Render the instance group manifests ---------------------- 0.46s
+kops_cluster : Write the Terraform-generated SSH public key to disk ----- 0.41s
+kops_cluster : Render the EncryptionConfiguration ----------------------- 0.41s

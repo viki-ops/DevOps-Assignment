@@ -1,0 +1,109 @@
+---
+# =============================================================================
+# Install ArgoCD with Helm, wired to the Terraform-provisioned IRSA role.
+#
+# Idempotent: `helm upgrade --install` against an unchanged values file is a
+# no-op, and the task reports changed only when the release revision moves.
+# =============================================================================
+
+- name: Ensure the build directory exists
+  ansible.builtin.file:
+    path: "{{ argocd_build_dir }}"
+    state: directory
+    mode: "0750"
+
+- name: Read the ArgoCD IRSA role ARN from Terraform
+  ansible.builtin.command:
+    cmd: terraform output -raw argocd_role_arn
+    chdir: "{{ terraform_live_dir }}"
+  register: argocd_role_output
+  changed_when: false
+
+- name: Bind the role ARN to a fact
+  ansible.builtin.set_fact:
+    argocd_role_arn: "{{ argocd_role_output.stdout | trim }}"
+
+- name: Verify the role ARN looks sane
+  ansible.builtin.assert:
+    that:
+      - argocd_role_arn is search('^arn:aws:iam::[0-9]{12}:role/')
+    fail_msg: "argocd_role_arn from Terraform is not an IAM role ARN: {{ argocd_role_arn }}"
+
+# ServiceMonitors only exist once kube-prometheus-stack has installed its CRDs.
+# Enabling them before that makes every ArgoCD manifest fail to apply with "no
+# matches for kind ServiceMonitor", which reads like an ArgoCD problem and is
+# not. Detect instead of assuming, so this works on both the first run and
+# every run after observability lands.
+- name: Check whether the ServiceMonitor CRD is present
+  ansible.builtin.command:
+    cmd: kubectl get crd servicemonitors.monitoring.coreos.com
+  register: servicemonitor_crd
+  changed_when: false
+  failed_when: false
+
+- name: Enable ServiceMonitors only if their CRD exists
+  ansible.builtin.set_fact:
+    argocd_service_monitor: "{{ servicemonitor_crd.rc == 0 }}"
+
+- name: Report metrics wiring
+  ansible.builtin.debug:
+    msg: >-
+      {{ 'ServiceMonitor CRD found - ArgoCD metrics will be scraped.'
+         if argocd_service_monitor
+         else 'No ServiceMonitor CRD yet - metrics exposed but not scraped. Re-run after kube-prometheus-stack syncs.' }}
+
+- name: Add the argo Helm repository
+  kubernetes.core.helm_repository:
+    name: "{{ argocd_chart_repo_name }}"
+    repo_url: "{{ argocd_chart_repo_url }}"
+
+- name: Render the ArgoCD values file
+  ansible.builtin.template:
+    src: values.yaml.j2
+    dest: "{{ argocd_build_dir }}/values.yaml"
+    mode: "0640"
+
+- name: Install or upgrade ArgoCD
+  kubernetes.core.helm:
+    name: "{{ argocd_release_name }}"
+    chart_ref: "{{ argocd_chart_repo_name }}/{{ argocd_chart_name }}"
+    chart_version: "{{ argocd_chart_version }}"
+    release_namespace: "{{ argocd_namespace }}"
+    create_namespace: true
+    values_files:
+      - "{{ argocd_build_dir }}/values.yaml"
+    atomic: true
+    wait: true
+    wait_timeout: "{{ argocd_wait_timeout }}"
+
+- name: Wait for the ArgoCD server to be available
+  ansible.builtin.command:
+    cmd: >-
+      kubectl wait --for=condition=Available deployment/argocd-server
+      -n {{ argocd_namespace }} --timeout=300s
+  changed_when: false
+
+# The webhook mutates Pods at admission time, not Deployments. Checking the
+# Deployment's env would always fail even when IRSA is working, because the
+# annotation lives on the ServiceAccount and the injection is applied to each
+# Pod as it is created.
+- name: Verify IRSA was injected into a running repo-server pod
+  ansible.builtin.shell:
+    cmd: >-
+      kubectl get pods -n {{ argocd_namespace }}
+      -l app.kubernetes.io/name=argocd-repo-server
+      -o jsonpath='{.items[0].spec.containers[0].env[?(@.name=="AWS_ROLE_ARN")].value}'
+    executable: /bin/bash
+  register: irsa_injected
+  changed_when: false
+
+- name: Assert the repo-server received AWS credentials
+  ansible.builtin.assert:
+    that:
+      - irsa_injected.stdout | trim == argocd_role_arn
+    fail_msg: >-
+      The pod-identity-webhook did not inject AWS_ROLE_ARN into
+      argocd-repo-server (got "{{ irsa_injected.stdout | trim }}").
+      The ServiceAccount annotation alone does nothing; check that
+      pod-identity-webhook is Running in kube-system.
+    success_msg: "IRSA injected: {{ argocd_role_arn }}"

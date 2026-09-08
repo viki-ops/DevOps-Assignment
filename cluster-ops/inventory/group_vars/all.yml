@@ -19,6 +19,11 @@ terraform_version: "1.16.1"
 kubectl_version: "1.34.10"      # kept in lockstep with the cluster version
 helm_version: "3.21.4"          # Helm 3, not 4 - ArgoCD 3.5 templates with v3
 argocd_version: "3.5.2"
+
+# Chart version is pinned independently of the app version: the argo-helm chart
+# and ArgoCD itself release on different cadences, so "latest chart for this
+# app version" is not stable over time. 10.8.2 ships appVersion v3.5.2.
+argocd_chart_version: "10.8.2"
 yq_version: "4.53.6"
 kubeconform_version: "0.8.0"
 tflint_version: "0.64.0"
@@ -35,7 +40,78 @@ project: "platform"
 # so no public Route53 zone (and therefore no registered domain) is required:
 # kOps writes the API Network Load Balancer hostname straight into kubeconfig.
 cluster_name: "dev.k8s.local"
-kops_state_store: "s3://platform-dev-kops-state-125788629837"
+
+# Created by infra-live/_bootstrap, in eu-north-1 alongside the cluster.
+#
+# Deliberately NOT the pre-existing platform-dev-kops-state-125788629837: that
+# bucket lives in us-west-2 (so every node boot would fetch its configuration
+# cross-region, bypassing the S3 gateway endpoint) and its default encryption
+# key is pending deletion, which makes writes fail outright.
+kops_state_store: "s3://platform-kops-state-eun1-125788629837"
 
 # Terraform stack whose outputs feed the kOps cluster manifest.
-terraform_live_dir: "../infra-live/dev"
+#
+# Absolute, derived from playbook_dir. Ansible modules do not run with the
+# playbook's working directory, so a relative path here fails with a confusing
+# "Unable to change directory before execution".
+terraform_live_dir: "{{ playbook_dir }}/../../infra-live/dev"
+
+# Where rendered manifests are written before being applied. Gitignored.
+kops_build_dir: "{{ playbook_dir }}/../build"
+
+# ---------------------------------------------------------------------------
+# Cluster shape
+# ---------------------------------------------------------------------------
+kops:
+  # Three control-plane nodes, one per AZ. Three, not two: etcd needs an odd
+  # number to form a quorum, and a 2-node etcd cluster tolerates zero failures
+  # while costing more than a single node.
+  control_plane:
+    machine_type: t3.medium
+    volume_size: 32
+    volume_type: gp3
+
+  # On-demand workers carry anything that must not be interrupted: ArgoCD,
+  # Prometheus, and the ingress controllers. Pinned via a node label the
+  # platform chart selects on.
+  nodes_ondemand:
+    machine_type: t3.large
+    min_size: 2
+    max_size: 4
+    volume_size: 50
+    volume_type: gp3
+
+  # Spot workers carry the stateless application replicas. Mixed instance
+  # policy across three families so a single capacity pool drying up does not
+  # take the group down.
+  #
+  # t3a.large is deliberately absent: AWS does not offer it in eu-north-1.
+  nodes_spot:
+    machine_types:
+      - t3.large
+      - m5.large
+      - m6i.large
+    min_size: 2
+    max_size: 6
+    volume_size: 50
+    volume_type: gp3
+    on_demand_base: 0
+    on_demand_above_base_percentage: 0
+
+  bastion:
+    machine_type: t3.micro
+    volume_size: 16
+
+# ---------------------------------------------------------------------------
+# Access control
+#
+# Both the API server and SSH are locked to the operator's egress address.
+# 0.0.0.0/0 would be the easy choice and is a genuine finding - an exposed
+# kube-apiserver is one credential leak away from cluster takeover.
+#
+# If your egress IP changes, re-run cluster-create.yml (it re-detects) or see
+# docs/runbooks/provisioning.md for the one-command security group fix.
+# ---------------------------------------------------------------------------
+kops_api_access_extra_cidrs: []
+kops_ssh_access_extra_cidrs: []
+

@@ -1,0 +1,204 @@
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: "2026-09-07T11:03:53Z"
+  labels:
+    kops.k8s.io/cluster: dev.k8s.local
+  name: bastion
+spec:
+  cloudLabels:
+    Environment: dev
+    Project: platform
+    Role: bastion
+  instanceMetadata:
+    httpPutResponseHopLimit: 1
+    httpTokens: required
+  machineType: t3.micro
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: bastion
+  role: Bastion
+  rootVolumeSize: 16
+  rootVolumeType: gp3
+  subnets:
+  - utility-eu-north-1a
+  - utility-eu-north-1b
+  - utility-eu-north-1c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: "2026-09-07T11:03:46Z"
+  labels:
+    kops.k8s.io/cluster: dev.k8s.local
+  name: control-plane-eu-north-1a
+spec:
+  cloudLabels:
+    Environment: dev
+    Project: platform
+    Role: control-plane
+  instanceMetadata:
+    httpPutResponseHopLimit: 1
+    httpTokens: required
+  machineType: t3.medium
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: control-plane-eu-north-1a
+    node-role.kubernetes.io/control-plane: ""
+  role: Master
+  rootVolumeEncryption: true
+  rootVolumeEncryptionKey: arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c
+  rootVolumeSize: 32
+  rootVolumeType: gp3
+  subnets:
+  - eu-north-1a
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: "2026-09-07T11:03:48Z"
+  labels:
+    kops.k8s.io/cluster: dev.k8s.local
+  name: control-plane-eu-north-1b
+spec:
+  cloudLabels:
+    Environment: dev
+    Project: platform
+    Role: control-plane
+  instanceMetadata:
+    httpPutResponseHopLimit: 1
+    httpTokens: required
+  machineType: t3.medium
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: control-plane-eu-north-1b
+    node-role.kubernetes.io/control-plane: ""
+  role: Master
+  rootVolumeEncryption: true
+  rootVolumeEncryptionKey: arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c
+  rootVolumeSize: 32
+  rootVolumeType: gp3
+  subnets:
+  - eu-north-1b
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: "2026-09-07T11:03:49Z"
+  labels:
+    kops.k8s.io/cluster: dev.k8s.local
+  name: control-plane-eu-north-1c
+spec:
+  cloudLabels:
+    Environment: dev
+    Project: platform
+    Role: control-plane
+  instanceMetadata:
+    httpPutResponseHopLimit: 1
+    httpTokens: required
+  machineType: t3.medium
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: control-plane-eu-north-1c
+    node-role.kubernetes.io/control-plane: ""
+  role: Master
+  rootVolumeEncryption: true
+  rootVolumeEncryptionKey: arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c
+  rootVolumeSize: 32
+  rootVolumeType: gp3
+  subnets:
+  - eu-north-1c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: "2026-09-07T11:03:50Z"
+  labels:
+    kops.k8s.io/cluster: dev.k8s.local
+  name: nodes-ondemand
+spec:
+  cloudLabels:
+    Environment: dev
+    Project: platform
+    Role: node
+    k8s.io/cluster-autoscaler/dev.k8s.local: owned
+    k8s.io/cluster-autoscaler/enabled: "true"
+    k8s.io/cluster-autoscaler/node-template/label/lifecycle: on-demand
+    lifecycle: on-demand
+  instanceMetadata:
+    httpPutResponseHopLimit: 1
+    httpTokens: required
+  machineType: t3.large
+  maxSize: 4
+  minSize: 2
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-ondemand
+    lifecycle: on-demand
+    workload: platform
+  role: Node
+  rootVolumeEncryption: true
+  rootVolumeEncryptionKey: arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c
+  rootVolumeSize: 50
+  rootVolumeType: gp3
+  subnets:
+  - eu-north-1a
+  - eu-north-1b
+  - eu-north-1c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: "2026-09-07T11:03:52Z"
+  labels:
+    kops.k8s.io/cluster: dev.k8s.local
+  name: nodes-spot
+spec:
+  cloudLabels:
+    Environment: dev
+    Project: platform
+    Role: node
+    k8s.io/cluster-autoscaler/dev.k8s.local: owned
+    k8s.io/cluster-autoscaler/enabled: "true"
+    k8s.io/cluster-autoscaler/node-template/label/lifecycle: spot
+    lifecycle: spot
+  instanceMetadata:
+    httpPutResponseHopLimit: 1
+    httpTokens: required
+  machineType: t3.large
+  maxSize: 6
+  minSize: 2
+  mixedInstancesPolicy:
+    instances:
+    - t3.large
+    - m5.large
+    - m6i.large
+    onDemandAboveBase: 0
+    onDemandBase: 0
+    spotAllocationStrategy: capacity-optimized
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-spot
+    lifecycle: spot
+    workload: apps
+  role: Node
+  rootVolumeEncryption: true
+  rootVolumeEncryptionKey: arn:aws:kms:eu-north-1:125788629837:key/c4e96a0d-2c49-4510-98a6-462338b8443c
+  rootVolumeSize: 50
+  rootVolumeType: gp3
+  subnets:
+  - eu-north-1a
+  - eu-north-1b
+  - eu-north-1c

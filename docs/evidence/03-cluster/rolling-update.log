@@ -1,0 +1,176 @@
+NAME				STATUS		NEEDUPDATE	READY	MIN	TARGET	MAX	NODES
+bastion				Ready		0		1	1	1	1	0
+control-plane-eu-north-1a	NeedsUpdate	1		0	1	1	1	1
+control-plane-eu-north-1b	NeedsUpdate	1		0	1	1	1	1
+control-plane-eu-north-1c	NeedsUpdate	1		0	1	1	1	1
+nodes-ondemand			NeedsUpdate	2		0	2	2	4	2
+nodes-spot			NeedsUpdate	2		0	2	2	6	2
+I0907 11:34:15.837586   35110 instancegroups.go:530] Validating the cluster.
+I0907 11:34:23.152080   35110 instancegroups.go:566] Cluster validated.
+I0907 11:34:23.152110   35110 instancegroups.go:364] Tainting 1 node in "control-plane-eu-north-1a" instancegroup.
+I0907 11:34:23.391746   35110 instancegroups.go:453] Draining the node: "i-0b8fdbe8df706f7c6".
+I0907 11:34:23.901549   35110 aws_cloud.go:624] Deregistering instance from targetGroup: arn:aws:elasticloadbalancing:eu-north-1:125788629837:targetgroup/tcp-dev-k8s-local-h3k5ag/943b318186b07aa4
+I0907 11:34:23.901791   35110 aws_cloud.go:624] Deregistering instance from targetGroup: arn:aws:elasticloadbalancing:eu-north-1:125788629837:targetgroup/kops-controller-dev-k8s-l-3qvr07/1f651fc6ac546afe
+I0907 11:35:58.199830   35110 aws_cloud.go:664] Successfully drained instance from targetGroup: arn:aws:elasticloadbalancing:eu-north-1:125788629837:targetgroup/kops-controller-dev-k8s-l-3qvr07/1f651fc6ac546afe
+I0907 11:35:58.387258   35110 aws_cloud.go:664] Successfully drained instance from targetGroup: arn:aws:elasticloadbalancing:eu-north-1:125788629837:targetgroup/tcp-dev-k8s-local-h3k5ag/943b318186b07aa4
+WARNING: ignoring DaemonSet-managed Pods: kube-system/aws-cloud-controller-manager-8n4px, kube-system/cilium-926wz, kube-system/ebs-csi-node-q5s2s, kube-system/kops-controller-fmkbj
+evicting pod kube-system/cert-manager-7699f5b75b-qxsl8
+evicting pod kube-system/cert-manager-webhook-569b97998-6mb2b
+evicting pod kube-system/cert-manager-cainjector-744f675bf-gq2lm
+I0907 11:36:03.787534   35110 instancegroups.go:742] Waiting for 5s for pods to stabilize after draining.
+I0907 11:36:08.791358   35110 instancegroups.go:654] Stopping instance "i-0b8fdbe8df706f7c6", node "i-0b8fdbe8df706f7c6", in group "control-plane-eu-north-1a.masters.dev.k8s.local" (this may take a while).
+I0907 11:36:09.942758   35110 instancegroups.go:491] waiting for 15s after terminating instance
+I0907 11:36:24.945867   35110 instancegroups.go:530] Validating the cluster.
+I0907 11:36:32.081216   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": InstanceGroup "control-plane-eu-north-1a" did not have enough nodes 0 vs 1.
+I0907 11:37:09.390103   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": InstanceGroup "control-plane-eu-north-1a" did not have enough nodes 0 vs 1.
+I0907 11:37:46.313010   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": InstanceGroup "control-plane-eu-north-1a" did not have enough nodes 0 vs 1.
+W0907 11:38:19.475078   35110 aws_cloud.go:1070] ignoring instance as it is terminating: i-0b8fdbe8df706f7c6 in autoscaling group: control-plane-eu-north-1a.masters.dev.k8s.local
+I0907 11:38:23.556697   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": machine "i-0343052a029aa9f1a" has not yet joined cluster.
+W0907 11:38:56.291768   35110 aws_cloud.go:1070] ignoring instance as it is terminating: i-0b8fdbe8df706f7c6 in autoscaling group: control-plane-eu-north-1a.masters.dev.k8s.local
+I0907 11:39:00.218330   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": machine "i-0343052a029aa9f1a" has not yet joined cluster, system-node-critical pod "cilium-2rtj8" is pending, system-node-critical pod "ebs-csi-node-jq4qt" is pending.
+W0907 11:39:33.150435   35110 aws_cloud.go:1070] ignoring instance as it is terminating: i-0b8fdbe8df706f7c6 in autoscaling group: control-plane-eu-north-1a.masters.dev.k8s.local
+I0907 11:39:37.049632   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": node "i-0343052a029aa9f1a" of role "control-plane" is not ready, system-node-critical pod "cilium-2rtj8" is not ready (cilium-agent), system-node-critical pod "ebs-csi-node-jq4qt" is pending.
+I0907 11:40:14.175528   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": control-plane node "i-0343052a029aa9f1a" is missing kube-controller-manager pod.
+I0907 11:40:51.273900   35110 instancegroups.go:569] Cluster validated; revalidating in 10s to make sure it does not flap.
+I0907 11:41:08.436419   35110 instancegroups.go:566] Cluster validated.
+I0907 11:41:08.436459   35110 instancegroups.go:530] Validating the cluster.
+I0907 11:41:15.634107   35110 instancegroups.go:566] Cluster validated.
+I0907 11:41:15.634138   35110 instancegroups.go:364] Tainting 1 node in "control-plane-eu-north-1b" instancegroup.
+I0907 11:41:15.901234   35110 instancegroups.go:453] Draining the node: "i-013378707ef7e9719".
+I0907 11:41:16.391557   35110 aws_cloud.go:624] Deregistering instance from targetGroup: arn:aws:elasticloadbalancing:eu-north-1:125788629837:targetgroup/tcp-dev-k8s-local-h3k5ag/943b318186b07aa4
+I0907 11:41:16.391756   35110 aws_cloud.go:624] Deregistering instance from targetGroup: arn:aws:elasticloadbalancing:eu-north-1:125788629837:targetgroup/kops-controller-dev-k8s-l-3qvr07/1f651fc6ac546afe
+I0907 11:42:50.731795   35110 aws_cloud.go:664] Successfully drained instance from targetGroup: arn:aws:elasticloadbalancing:eu-north-1:125788629837:targetgroup/kops-controller-dev-k8s-l-3qvr07/1f651fc6ac546afe
+I0907 11:42:50.731913   35110 aws_cloud.go:664] Successfully drained instance from targetGroup: arn:aws:elasticloadbalancing:eu-north-1:125788629837:targetgroup/tcp-dev-k8s-local-h3k5ag/943b318186b07aa4
+WARNING: ignoring DaemonSet-managed Pods: kube-system/aws-cloud-controller-manager-mzgzr, kube-system/cilium-z2g9l, kube-system/ebs-csi-node-5pms6, kube-system/kops-controller-99g8l
+evicting pod kube-system/cilium-operator-6cbfc598f9-2znkf
+evicting pod kube-system/cert-manager-webhook-569b97998-nsqsg
+I0907 11:42:55.760299   35110 instancegroups.go:742] Waiting for 5s for pods to stabilize after draining.
+I0907 11:43:00.761167   35110 instancegroups.go:654] Stopping instance "i-013378707ef7e9719", node "i-013378707ef7e9719", in group "control-plane-eu-north-1b.masters.dev.k8s.local" (this may take a while).
+I0907 11:43:01.798518   35110 instancegroups.go:491] waiting for 15s after terminating instance
+I0907 11:43:16.799915   35110 instancegroups.go:530] Validating the cluster.
+I0907 11:43:23.900882   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": InstanceGroup "control-plane-eu-north-1b" did not have enough nodes 0 vs 1.
+I0907 11:44:00.675392   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": InstanceGroup "control-plane-eu-north-1b" did not have enough nodes 0 vs 1.
+W0907 11:44:34.819654   35110 aws_cloud.go:1070] ignoring instance as it is terminating: i-013378707ef7e9719 in autoscaling group: control-plane-eu-north-1b.masters.dev.k8s.local
+I0907 11:44:37.999840   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": machine "i-0a8d77decb0186c6e" has not yet joined cluster.
+W0907 11:45:11.736472   35110 aws_cloud.go:1070] ignoring instance as it is terminating: i-013378707ef7e9719 in autoscaling group: control-plane-eu-north-1b.masters.dev.k8s.local
+I0907 11:45:14.614641   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": machine "i-0a8d77decb0186c6e" has not yet joined cluster, system-node-critical pod "cilium-lczvr" is pending, system-node-critical pod "ebs-csi-node-pg84s" is pending.
+W0907 11:45:48.246499   35110 aws_cloud.go:1070] ignoring instance as it is terminating: i-013378707ef7e9719 in autoscaling group: control-plane-eu-north-1b.masters.dev.k8s.local
+I0907 11:45:51.234191   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": node "i-0a8d77decb0186c6e" of role "control-plane" is not ready, system-node-critical pod "cilium-lczvr" is not ready (cilium-agent), system-node-critical pod "ebs-csi-node-pg84s" is pending.
+I0907 11:46:28.237759   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": control-plane node "i-0a8d77decb0186c6e" is missing kube-scheduler pod.
+I0907 11:47:06.029978   35110 instancegroups.go:569] Cluster validated; revalidating in 10s to make sure it does not flap.
+I0907 11:47:23.187202   35110 instancegroups.go:566] Cluster validated.
+I0907 11:47:23.187230   35110 instancegroups.go:530] Validating the cluster.
+I0907 11:47:30.073479   35110 instancegroups.go:566] Cluster validated.
+I0907 11:47:30.073523   35110 instancegroups.go:364] Tainting 1 node in "control-plane-eu-north-1c" instancegroup.
+I0907 11:47:30.302351   35110 instancegroups.go:453] Draining the node: "i-0f70cc465f12a3d1e".
+I0907 11:47:30.789489   35110 aws_cloud.go:624] Deregistering instance from targetGroup: arn:aws:elasticloadbalancing:eu-north-1:125788629837:targetgroup/tcp-dev-k8s-local-h3k5ag/943b318186b07aa4
+I0907 11:47:30.789647   35110 aws_cloud.go:624] Deregistering instance from targetGroup: arn:aws:elasticloadbalancing:eu-north-1:125788629837:targetgroup/kops-controller-dev-k8s-l-3qvr07/1f651fc6ac546afe
+I0907 11:49:05.011689   35110 aws_cloud.go:664] Successfully drained instance from targetGroup: arn:aws:elasticloadbalancing:eu-north-1:125788629837:targetgroup/tcp-dev-k8s-local-h3k5ag/943b318186b07aa4
+I0907 11:49:05.009390   35110 aws_cloud.go:664] Successfully drained instance from targetGroup: arn:aws:elasticloadbalancing:eu-north-1:125788629837:targetgroup/kops-controller-dev-k8s-l-3qvr07/1f651fc6ac546afe
+WARNING: ignoring DaemonSet-managed Pods: kube-system/aws-cloud-controller-manager-vfj4g, kube-system/cilium-jvhml, kube-system/ebs-csi-node-km5ll, kube-system/kops-controller-vn9m6
+evicting pod kube-system/cilium-operator-6cbfc598f9-m2b6c
+evicting pod kube-system/cert-manager-7699f5b75b-dphsk
+evicting pod kube-system/cert-manager-cainjector-744f675bf-2z88f
+I0907 11:49:10.237254   35110 instancegroups.go:742] Waiting for 5s for pods to stabilize after draining.
+I0907 11:49:15.251111   35110 instancegroups.go:654] Stopping instance "i-0f70cc465f12a3d1e", node "i-0f70cc465f12a3d1e", in group "control-plane-eu-north-1c.masters.dev.k8s.local" (this may take a while).
+I0907 11:49:16.353491   35110 instancegroups.go:491] waiting for 15s after terminating instance
+I0907 11:49:31.358633   35110 instancegroups.go:530] Validating the cluster.
+I0907 11:49:38.414256   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": InstanceGroup "control-plane-eu-north-1c" did not have enough nodes 0 vs 1.
+I0907 11:50:15.384201   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": InstanceGroup "control-plane-eu-north-1c" did not have enough nodes 0 vs 1.
+W0907 11:50:50.087310   35110 aws_cloud.go:1070] ignoring instance as it is terminating: i-0f70cc465f12a3d1e in autoscaling group: control-plane-eu-north-1c.masters.dev.k8s.local
+I0907 11:50:52.459383   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": machine "i-04774dc011843933e" has not yet joined cluster.
+W0907 11:51:27.420718   35110 aws_cloud.go:1070] ignoring instance as it is terminating: i-0f70cc465f12a3d1e in autoscaling group: control-plane-eu-north-1c.masters.dev.k8s.local
+I0907 11:51:29.505585   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": machine "i-04774dc011843933e" has not yet joined cluster.
+W0907 11:52:04.146402   35110 aws_cloud.go:1070] ignoring instance as it is terminating: i-0f70cc465f12a3d1e in autoscaling group: control-plane-eu-north-1c.masters.dev.k8s.local
+I0907 11:52:06.269755   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": node "i-04774dc011843933e" of role "control-plane" is not ready, system-cluster-critical pod "aws-cloud-controller-manager-2nhz5" is pending, system-node-critical pod "cilium-k9chn" is pending, system-node-critical pod "ebs-csi-node-zjnxt" is pending, system-cluster-critical pod "kops-controller-st5tv" is pending.
+W0907 11:52:40.776520   35110 aws_cloud.go:1070] ignoring instance as it is terminating: i-0f70cc465f12a3d1e in autoscaling group: control-plane-eu-north-1c.masters.dev.k8s.local
+I0907 11:52:42.864588   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": system-node-critical pod "ebs-csi-node-zjnxt" is not ready (ebs-plugin), control-plane node "i-04774dc011843933e" is missing kube-controller-manager pod.
+I0907 11:53:20.377702   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": control-plane node "i-04774dc011843933e" is missing kube-controller-manager pod.
+I0907 11:53:57.590876   35110 instancegroups.go:569] Cluster validated; revalidating in 10s to make sure it does not flap.
+I0907 11:54:14.564796   35110 instancegroups.go:566] Cluster validated.
+I0907 11:54:14.566729   35110 instancegroups.go:530] Validating the cluster.
+I0907 11:54:21.470535   35110 instancegroups.go:566] Cluster validated.
+I0907 11:54:21.470563   35110 instancegroups.go:364] Tainting 2 nodes in "nodes-ondemand" instancegroup.
+I0907 11:54:22.022401   35110 instancegroups.go:631] Detaching instance "i-07d0a9e1a5d2885c0", node "i-07d0a9e1a5d2885c0", in group "nodes-ondemand.dev.k8s.local".
+I0907 11:54:22.850428   35110 instancegroups.go:225] waiting for 15s after detaching instance
+I0907 11:54:37.857071   35110 instancegroups.go:530] Validating the cluster.
+I0907 11:54:45.232061   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": machine "i-0ddc3dbfde4ced571" has not yet joined cluster.
+I0907 11:55:22.122025   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": machine "i-0ddc3dbfde4ced571" has not yet joined cluster, system-node-critical pod "cilium-vsbkb" is pending, system-node-critical pod "ebs-csi-node-qs7b6" is pending, system-node-critical pod "kube-proxy-i-0ddc3dbfde4ced571" is pending.
+I0907 11:55:58.902236   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": node "i-0ddc3dbfde4ced571" of role "node" is not ready, system-node-critical pod "cilium-vsbkb" is pending, system-node-critical pod "ebs-csi-node-qs7b6" is pending.
+I0907 11:56:36.127373   35110 instancegroups.go:569] Cluster validated; revalidating in 10s to make sure it does not flap.
+I0907 11:56:53.430576   35110 instancegroups.go:566] Cluster validated.
+I0907 11:56:53.432554   35110 instancegroups.go:453] Draining the node: "i-06760ff1926bc7eff".
+WARNING: ignoring DaemonSet-managed Pods: kube-system/cilium-5dcdr, kube-system/ebs-csi-node-2xsnc
+evicting pod kube-system/pod-identity-webhook-7cbffc4d8b-wsljv
+evicting pod kube-system/coredns-autoscaler-75965c4fc6-gtddm
+evicting pod kube-system/aws-node-termination-handler-756fc57f97-67zbb
+evicting pod kube-system/coredns-7999fc5b59-q8k5b
+evicting pod kube-system/ebs-csi-controller-64f6d5c74b-bqcjl
+evicting pod kube-system/metrics-server-776b8f47b9-x5vw8
+I0907 11:57:06.870871   35110 instancegroups.go:742] Waiting for 5s for pods to stabilize after draining.
+I0907 11:57:11.874960   35110 instancegroups.go:654] Stopping instance "i-06760ff1926bc7eff", node "i-06760ff1926bc7eff", in group "nodes-ondemand.dev.k8s.local" (this may take a while).
+I0907 11:57:12.465277   35110 instancegroups.go:491] waiting for 15s after terminating instance
+I0907 11:57:27.477179   35110 instancegroups.go:530] Validating the cluster.
+I0907 11:57:34.722066   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": InstanceGroup "nodes-ondemand" did not have enough nodes 1 vs 2, system-node-critical pod "cilium-ltlpp" is pending, system-node-critical pod "kube-proxy-i-06760ff1926bc7eff" is not ready (kube-proxy).
+I0907 11:58:11.343446   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": InstanceGroup "nodes-ondemand" did not have enough nodes 1 vs 2, system-node-critical pod "cilium-ltlpp" is pending.
+I0907 11:58:48.165863   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": InstanceGroup "nodes-ondemand" did not have enough nodes 1 vs 2.
+I0907 11:59:24.834990   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": InstanceGroup "nodes-ondemand" did not have enough nodes 1 vs 2.
+I0907 12:00:01.996898   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": machine "i-01820d54d420c687a" has not yet joined cluster.
+I0907 12:00:38.635390   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": node "i-01820d54d420c687a" of role "node" is not ready, system-node-critical pod "cilium-2bvlr" is pending, system-node-critical pod "ebs-csi-node-gmtqs" is pending, system-node-critical pod "kube-proxy-i-01820d54d420c687a" is pending.
+I0907 12:01:16.057013   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": system-node-critical pod "ebs-csi-node-gmtqs" is not ready (ebs-plugin).
+I0907 12:01:52.852651   35110 instancegroups.go:569] Cluster validated; revalidating in 10s to make sure it does not flap.
+I0907 12:02:09.730453   35110 instancegroups.go:566] Cluster validated.
+I0907 12:02:09.730492   35110 instancegroups.go:453] Draining the node: "i-07d0a9e1a5d2885c0".
+WARNING: ignoring DaemonSet-managed Pods: kube-system/cilium-s66xj, kube-system/ebs-csi-node-m752n
+evicting pod kube-system/coredns-7999fc5b59-vmfdx
+I0907 12:02:23.928658   35110 instancegroups.go:742] Waiting for 5s for pods to stabilize after draining.
+I0907 12:02:28.931607   35110 instancegroups.go:654] Stopping instance "i-07d0a9e1a5d2885c0", node "i-07d0a9e1a5d2885c0", in group "nodes-ondemand.dev.k8s.local" (this may take a while).
+I0907 12:02:29.435947   35110 instancegroups.go:491] waiting for 15s after terminating instance
+I0907 12:02:44.449734   35110 instancegroups.go:530] Validating the cluster.
+I0907 12:02:51.709859   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": system-node-critical pod "cilium-wfbmq" is pending, system-node-critical pod "kube-proxy-i-07d0a9e1a5d2885c0" is not ready (kube-proxy).
+I0907 12:03:28.647435   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": system-node-critical pod "cilium-wfbmq" is pending.
+I0907 12:04:05.400454   35110 instancegroups.go:569] Cluster validated; revalidating in 10s to make sure it does not flap.
+I0907 12:04:22.190186   35110 instancegroups.go:566] Cluster validated.
+I0907 12:04:22.191290   35110 instancegroups.go:530] Validating the cluster.
+I0907 12:04:29.330211   35110 instancegroups.go:566] Cluster validated.
+I0907 12:04:29.330243   35110 instancegroups.go:364] Tainting 2 nodes in "nodes-spot" instancegroup.
+I0907 12:04:29.776380   35110 instancegroups.go:631] Detaching instance "i-06a46105aedb09d86", node "i-06a46105aedb09d86", in group "nodes-spot.dev.k8s.local".
+I0907 12:04:30.664668   35110 instancegroups.go:225] waiting for 15s after detaching instance
+I0907 12:04:45.665736   35110 instancegroups.go:530] Validating the cluster.
+I0907 12:04:53.168433   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": machine "i-0c0ec45159c9990fc" has not yet joined cluster.
+I0907 12:05:29.529351   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": node "i-0c0ec45159c9990fc" of role "node" is not ready, system-node-critical pod "cilium-gw9x2" is pending, system-node-critical pod "ebs-csi-node-f5hst" is pending.
+I0907 12:06:06.127564   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": system-node-critical pod "ebs-csi-node-f5hst" is not ready (ebs-plugin).
+I0907 12:06:42.571809   35110 instancegroups.go:569] Cluster validated; revalidating in 10s to make sure it does not flap.
+I0907 12:07:00.241155   35110 instancegroups.go:566] Cluster validated.
+I0907 12:07:00.241195   35110 instancegroups.go:453] Draining the node: "i-03abd46c905e42c0e".
+WARNING: ignoring DaemonSet-managed Pods: kube-system/cilium-bgbtq, kube-system/ebs-csi-node-txfng
+evicting pod kube-system/pod-identity-webhook-7cbffc4d8b-psbm5
+evicting pod kube-system/coredns-autoscaler-75965c4fc6-44nhs
+evicting pod kube-system/ebs-csi-controller-64f6d5c74b-fkcqh
+evicting pod kube-system/aws-node-termination-handler-756fc57f97-nfc2n
+I0907 12:07:04.528248   35110 instancegroups.go:742] Waiting for 5s for pods to stabilize after draining.
+I0907 12:07:09.529090   35110 instancegroups.go:654] Stopping instance "i-03abd46c905e42c0e", node "i-03abd46c905e42c0e", in group "nodes-spot.dev.k8s.local" (this may take a while).
+I0907 12:07:10.263055   35110 instancegroups.go:491] waiting for 15s after terminating instance
+I0907 12:07:25.277738   35110 instancegroups.go:530] Validating the cluster.
+I0907 12:07:32.412212   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": InstanceGroup "nodes-spot" did not have enough nodes 1 vs 2, system-node-critical pod "cilium-fvz8f" is pending, system-node-critical pod "kube-proxy-i-03abd46c905e42c0e" is not ready (kube-proxy).
+I0907 12:08:09.218875   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": InstanceGroup "nodes-spot" did not have enough nodes 1 vs 2, system-node-critical pod "cilium-fvz8f" is pending.
+I0907 12:08:46.777769   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": machine "i-0879ef32ab4678662" has not yet joined cluster.
+I0907 12:09:23.536942   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": node "i-0879ef32ab4678662" of role "node" is not ready, system-node-critical pod "cilium-6pgz6" is pending, system-node-critical pod "ebs-csi-node-lhs62" is pending.
+I0907 12:10:00.449011   35110 instancegroups.go:569] Cluster validated; revalidating in 10s to make sure it does not flap.
+I0907 12:10:17.009316   35110 instancegroups.go:566] Cluster validated.
+I0907 12:10:17.009351   35110 instancegroups.go:453] Draining the node: "i-06a46105aedb09d86".
+WARNING: ignoring DaemonSet-managed Pods: kube-system/cilium-lsnpk, kube-system/ebs-csi-node-fsxrs
+evicting pod kube-system/pod-identity-webhook-7cbffc4d8b-xdldc
+evicting pod kube-system/coredns-7999fc5b59-wxxkp
+evicting pod kube-system/ebs-csi-controller-64f6d5c74b-hctlf
+evicting pod kube-system/metrics-server-776b8f47b9-twzcx
+evicting pod kube-system/aws-node-termination-handler-756fc57f97-bbztp
+I0907 12:10:30.250838   35110 instancegroups.go:742] Waiting for 5s for pods to stabilize after draining.
+I0907 12:10:35.252889   35110 instancegroups.go:654] Stopping instance "i-06a46105aedb09d86", node "i-06a46105aedb09d86", in group "nodes-spot.dev.k8s.local" (this may take a while).
+I0907 12:10:35.782393   35110 instancegroups.go:491] waiting for 15s after terminating instance
+I0907 12:10:50.796024   35110 instancegroups.go:530] Validating the cluster.
+I0907 12:10:57.431541   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": system-node-critical pod "cilium-5jbkk" is pending, system-node-critical pod "kube-proxy-i-06a46105aedb09d86" is not ready (kube-proxy).
+I0907 12:11:34.490283   35110 instancegroups.go:589] Cluster did not pass validation, will retry in "30s": system-node-critical pod "cilium-5jbkk" is pending.
+I0907 12:12:11.536715   35110 instancegroups.go:569] Cluster validated; revalidating in 10s to make sure it does not flap.
+I0907 12:12:28.308419   35110 instancegroups.go:566] Cluster validated.
+I0907 12:12:28.308476   35110 rollingupdate.go:236] Completed rolling update for cluster "dev.k8s.local" instance groups [bastion control-plane-eu-north-1a control-plane-eu-north-1b control-plane-eu-north-1c nodes-ondemand nodes-spot]

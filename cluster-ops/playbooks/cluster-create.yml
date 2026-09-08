@@ -1,0 +1,56 @@
+---
+# =============================================================================
+# cluster-create.yml - generate the kOps manifests from Terraform outputs and
+# bring the cluster up.
+#
+#   ansible-playbook playbooks/cluster-create.yml
+#
+# Prerequisite: infra-live/dev must be applied (`make infra`). This playbook
+# reads that stack's outputs and refuses to run if they are missing.
+#
+# Safe to re-run. On an existing cluster it re-renders the manifests, reconciles
+# the state store, shows the diff and applies only what changed.
+# =============================================================================
+
+- name: Create or reconcile the kOps cluster
+  hosts: controller
+  gather_facts: true
+  become: false
+
+  pre_tasks:
+    - name: Verify the toolchain is present
+      ansible.builtin.command: "{{ item }} version"
+      loop:
+        - kops
+        - terraform
+      changed_when: false
+
+    - name: Verify AWS credentials
+      ansible.builtin.command: aws sts get-caller-identity
+      changed_when: false
+
+  roles:
+    - kops_cluster
+
+  post_tasks:
+    - name: Fetch the API server endpoint kOps wrote into kubeconfig
+      ansible.builtin.command: kubectl config view --minify -o jsonpath={.clusters[0].cluster.server}
+      register: api_endpoint
+      changed_when: false
+
+    - name: Fetch nodes
+      ansible.builtin.command: kubectl get nodes -o wide
+      register: node_list
+      changed_when: false
+
+    - name: Cluster summary
+      ansible.builtin.debug:
+        msg: |
+          Cluster:  {{ cluster_name }}
+          Version:  {{ kubernetes_version }}
+          API:      {{ api_endpoint.stdout }}
+
+          Note the API endpoint is an AWS-assigned NLB hostname, not a domain we
+          own. That is None-DNS working as intended.
+
+          {{ node_list.stdout }}

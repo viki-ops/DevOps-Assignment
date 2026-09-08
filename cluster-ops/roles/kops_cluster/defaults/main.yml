@@ -1,0 +1,17 @@
+---
+# Environment shared by every kops invocation in this role.
+kops_env:
+  KOPS_STATE_STORE: "{{ kops_state_store }}"
+  AWS_REGION: "{{ aws_region }}"
+  AWS_DEFAULT_REGION: "{{ aws_region }}"
+
+# How long `kops validate cluster --wait` will keep retrying. A three-AZ
+# control plane plus four workers typically converges in 8-12 minutes; 25
+# leaves room for a slow AMI pull or a spot capacity retry without failing the
+# run spuriously.
+kops_validate_timeout: "25m"
+
+# Admin kubeconfig credential lifetime. kOps defaults to 18h; 24h covers a
+# working session, and shorter-lived is better than a certificate that outlives
+# the cluster.
+kubeconfig_admin_ttl: "24h"

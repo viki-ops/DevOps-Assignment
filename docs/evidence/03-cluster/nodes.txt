@@ -1,0 +1,8 @@
+NAME                  STATUS                     ROLES              AGE     VERSION    INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION    CONTAINER-RUNTIME
+i-013378707ef7e9719   Ready                      control-plane      3h30m   v1.34.10   10.20.52.180   <none>        Ubuntu 24.04.4 LTS   6.17.0-1019-aws   containerd://2.2.4
+i-03abd46c905e42c0e   Ready                      node,spot-worker   3h29m   v1.34.10   10.20.80.11    <none>        Ubuntu 24.04.4 LTS   6.17.0-1019-aws   containerd://2.2.4
+i-06760ff1926bc7eff   Ready                      node               3h29m   v1.34.10   10.20.22.52    <none>        Ubuntu 24.04.4 LTS   6.17.0-1019-aws   containerd://2.2.4
+i-06a46105aedb09d86   Ready                      node,spot-worker   3h29m   v1.34.10   10.20.25.35    <none>        Ubuntu 24.04.4 LTS   6.17.0-1019-aws   containerd://2.2.4
+i-07d0a9e1a5d2885c0   Ready                      node               3h29m   v1.34.10   10.20.81.238   <none>        Ubuntu 24.04.4 LTS   6.17.0-1019-aws   containerd://2.2.4
+i-0b8fdbe8df706f7c6   Ready,SchedulingDisabled   control-plane      3h30m   v1.34.10   10.20.8.201    <none>        Ubuntu 24.04.4 LTS   6.17.0-1019-aws   containerd://2.2.4
+i-0f70cc465f12a3d1e   Ready                      control-plane      3h30m   v1.34.10   10.20.68.4     <none>        Ubuntu 24.04.4 LTS   6.17.0-1019-aws   containerd://2.2.4

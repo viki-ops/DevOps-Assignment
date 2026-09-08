@@ -1,0 +1,21 @@
+---
+argocd_namespace: argocd
+argocd_release_name: argocd
+argocd_chart_repo_name: argo
+argocd_chart_repo_url: https://argoproj.github.io/argo-helm
+argocd_chart_name: argo-cd
+
+# Where the rendered values file is written before `helm upgrade` consumes it.
+argocd_build_dir: "{{ playbook_dir }}/../build/argocd"
+
+# The monorepo ArgoCD reconciles from. Public over HTTPS, so no repository
+# credentials are needed for read access - one less secret to manage. The
+# argocd IRSA role still grants Secrets Manager read for the day a private
+# repository is added.
+argocd_repo_url: https://github.com/viki-ops/DevOps-Assignment.git
+argocd_target_revision: main
+
+# How long to wait for the initial install. CRDs plus the controller,
+# repo-server, applicationset controller, Redis and server on a cold image
+# cache take a few minutes.
+argocd_wait_timeout: 10m

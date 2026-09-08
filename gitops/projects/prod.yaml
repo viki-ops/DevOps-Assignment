@@ -1,0 +1,73 @@
+# =============================================================================
+# AppProject: prod
+#
+# The most restricted project. Same namespace confinement as stage, plus a
+# sync window that prevents unattended changes outside business hours.
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: prod
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Application workloads for the prod environment.
+
+  sourceRepos:
+    - https://github.com/viki-ops/DevOps-Assignment.git
+
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: retail-store-prod
+    - server: https://kubernetes.default.svc
+      namespace: retail-data-prod
+
+  clusterResourceWhitelist: []
+
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+
+  namespaceResourceBlacklist:
+    - group: ""
+      kind: ResourceQuota
+    - group: ""
+      kind: LimitRange
+
+  roles:
+    - name: release-manager
+      description: Sync prod after a promotion PR has merged.
+      policies:
+        - p, proj:prod:release-manager, applications, get, prod/*, allow
+        - p, proj:prod:release-manager, applications, sync, prod/*, allow
+      groups:
+        - release-managers
+
+    - name: viewer
+      description: Read-only access for developers.
+      policies:
+        - p, proj:prod:viewer, applications, get, prod/*, allow
+      groups:
+        - developers
+
+  # Deny by default, allow during working hours. Applies to automated sync as
+  # well as manual, so a merge at 02:00 waits rather than deploying while
+  # nobody is watching. `manualSync: true` leaves a documented break-glass path
+  # for incidents.
+  syncWindows:
+    - kind: deny
+      schedule: "* * * * *"
+      duration: 24h
+      applications:
+        - "*"
+      manualSync: true
+    - kind: allow
+      schedule: "0 9 * * 1-5"
+      duration: 9h
+      applications:
+        - "*"
+      manualSync: true
+
+  orphanedResources:
+    warn: true

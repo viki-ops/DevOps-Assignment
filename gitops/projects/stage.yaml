@@ -1,0 +1,56 @@
+# =============================================================================
+# AppProject: stage
+#
+# Identical in shape to dev, with one deliberate difference: no `developer`
+# role granting sync. Reaching stage is a promotion, and promotion happens by
+# merging a pull request that moves an image digest - not by pressing Sync.
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: stage
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Application workloads for the stage environment.
+
+  sourceRepos:
+    - https://github.com/viki-ops/DevOps-Assignment.git
+
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: retail-store-stage
+    - server: https://kubernetes.default.svc
+      namespace: retail-data-stage
+
+  clusterResourceWhitelist: []
+
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+
+  namespaceResourceBlacklist:
+    - group: ""
+      kind: ResourceQuota
+    - group: ""
+      kind: LimitRange
+
+  roles:
+    - name: release-manager
+      description: Sync stage after a promotion PR has merged.
+      policies:
+        - p, proj:stage:release-manager, applications, get, stage/*, allow
+        - p, proj:stage:release-manager, applications, sync, stage/*, allow
+      groups:
+        - release-managers
+
+    - name: viewer
+      description: Read-only access for developers.
+      policies:
+        - p, proj:stage:viewer, applications, get, stage/*, allow
+      groups:
+        - developers
+
+  orphanedResources:
+    warn: true

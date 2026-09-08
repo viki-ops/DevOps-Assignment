@@ -1,0 +1,20 @@
+# EncryptionConfiguration for the kube-apiserver.
+#
+# Encrypts Secret objects before they are written to etcd. Without this,
+# Secrets are stored base64-encoded, meaning anyone who obtains an etcd
+# snapshot obtains every credential in the cluster in plaintext.
+#
+# Provider order matters: aescbc is listed first so it is used for writes,
+# with identity second so any Secret written before encryption was enabled can
+# still be read. Reversing them would silently disable encryption for writes.
+apiVersion: apiserver.config.k8s.io/v1
+kind: EncryptionConfiguration
+resources:
+  - resources:
+      - secrets
+    providers:
+      - aescbc:
+          keys:
+            - name: key1
+              secret: {{ aescbc_key }}
+      - identity: {}

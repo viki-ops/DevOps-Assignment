@@ -1,0 +1,256 @@
+---
+# =============================================================================
+# Render the kOps manifests from live Terraform outputs and reconcile the
+# cluster.
+#
+# Idempotent throughout: re-running against an existing, healthy cluster
+# renders the same manifests, produces an empty `kops update` diff and exits
+# without touching anything.
+# =============================================================================
+
+- name: Ensure build directory exists
+  ansible.builtin.file:
+    path: "{{ kops_build_dir }}"
+    state: directory
+    mode: "0750"
+
+# -----------------------------------------------------------------------------
+# Inputs
+# -----------------------------------------------------------------------------
+
+- name: Read Terraform outputs from the dev stack
+  ansible.builtin.command:
+    cmd: terraform output -json kops_cluster_inputs
+    chdir: "{{ terraform_live_dir }}"
+  register: tf_output
+  changed_when: false
+
+- name: Bind Terraform outputs to a fact
+  ansible.builtin.set_fact:
+    tfk: "{{ tf_output.stdout | from_json }}"
+
+- name: Sanity-check the Terraform contract
+  ansible.builtin.assert:
+    that:
+      - tfk.vpc_id is defined and tfk.vpc_id | length > 0
+      - tfk.private_subnets | length == 3
+      - tfk.public_subnets | length == 3
+      - tfk.nat_by_az | length == 3
+      - tfk.kms_key_arn is search('^arn:aws:kms:')
+      - tfk.oidc_issuer_url is search('^https://')
+    fail_msg: >-
+      The dev Terraform stack has not been applied, or its outputs have changed
+      shape. Run `make infra` first.
+    success_msg: "Terraform contract satisfied for VPC {{ tfk.vpc_id }}"
+
+- name: Detect the operator's public egress address
+  ansible.builtin.uri:
+    url: https://checkip.amazonaws.com
+    return_content: true
+  register: operator_ip_probe
+  changed_when: false
+
+- name: Derive the operator CIDR
+  ansible.builtin.set_fact:
+    operator_cidr: "{{ operator_ip_probe.content | trim }}/32"
+
+- name: Report the access allow-list
+  ansible.builtin.debug:
+    msg: >-
+      Kubernetes API and SSH will be restricted to {{ operator_cidr }}.
+      If your egress address changes, re-run this playbook to update the
+      security groups.
+
+# -----------------------------------------------------------------------------
+# Render
+# -----------------------------------------------------------------------------
+
+- name: Render the cluster manifest
+  ansible.builtin.template:
+    src: cluster.yaml.j2
+    dest: "{{ kops_build_dir }}/cluster.yaml"
+    mode: "0640"
+
+- name: Render the instance group manifests
+  ansible.builtin.template:
+    src: instancegroups.yaml.j2
+    dest: "{{ kops_build_dir }}/instancegroups.yaml"
+    mode: "0640"
+
+# Checks for empty documents as well as syntax. An empty document is easy to
+# introduce (a stray "---" after a comment block) and kOps reports it only as
+# the opaque "Object 'Kind' is missing in 'null'".
+- name: Confirm the rendered manifests are valid, non-empty YAML documents
+  ansible.builtin.script:
+    cmd: >-
+      validate_manifests.py
+      {{ kops_build_dir }}/cluster.yaml
+      {{ kops_build_dir }}/instancegroups.yaml
+    executable: python3
+  register: manifest_check
+  changed_when: false
+
+- name: Manifest validation result
+  ansible.builtin.debug:
+    msg: "{{ manifest_check.stdout_lines }}"
+
+# -----------------------------------------------------------------------------
+# Reconcile the cluster specification
+# -----------------------------------------------------------------------------
+
+- name: Check whether the cluster already exists in the state store
+  ansible.builtin.command:
+    cmd: kops get cluster --name {{ cluster_name }} --state {{ kops_state_store }} -o json
+  register: kops_existing
+  changed_when: false
+  failed_when: false
+  environment: "{{ kops_env }}"
+
+- name: Register whether this is a first creation
+  ansible.builtin.set_fact:
+    kops_cluster_exists: "{{ kops_existing.rc == 0 }}"
+
+- name: Create the cluster specification
+  ansible.builtin.command:
+    cmd: kops create -f {{ kops_build_dir }}/{{ item }}
+  loop:
+    - cluster.yaml
+    - instancegroups.yaml
+  when: not kops_cluster_exists
+  environment: "{{ kops_env }}"
+
+# `replace --force` rather than `create` on subsequent runs: it makes the state
+# store converge on the rendered manifest, which is what keeps this playbook
+# declarative instead of drifting from the templates.
+- name: Reconcile the cluster specification with the rendered manifests
+  ansible.builtin.command:
+    cmd: kops replace -f {{ kops_build_dir }}/{{ item }} --force
+  loop:
+    - cluster.yaml
+    - instancegroups.yaml
+  when: kops_cluster_exists
+  changed_when: true
+  environment: "{{ kops_env }}"
+
+# -----------------------------------------------------------------------------
+# Secrets
+# -----------------------------------------------------------------------------
+
+- name: Check for an existing SSH public key secret
+  ansible.builtin.command:
+    cmd: kops get secrets --name {{ cluster_name }} --state {{ kops_state_store }} -o json
+  register: kops_secrets
+  changed_when: false
+  failed_when: false
+  environment: "{{ kops_env }}"
+
+- name: Write the Terraform-generated SSH public key to disk
+  ansible.builtin.copy:
+    content: "{{ tfk.ssh_public_key }}"
+    dest: "{{ kops_build_dir }}/id_ed25519.pub"
+    mode: "0644"
+
+# No "admin" positional argument: in kOps 1.36 the positional slot is the
+# cluster name, so passing a key name there collides with --name.
+- name: Register the SSH public key with kOps
+  ansible.builtin.command:
+    cmd: >-
+      kops create sshpublickey
+      -i {{ kops_build_dir }}/id_ed25519.pub
+      --name {{ cluster_name }}
+      --state {{ kops_state_store }}
+  register: sshkey_result
+  changed_when: sshkey_result.rc == 0
+  failed_when:
+    - sshkey_result.rc != 0
+    - "'already exists' not in (sshkey_result.stderr | default(''))"
+  environment: "{{ kops_env }}"
+
+# The EncryptionConfiguration backing spec.encryptionConfig: true. Generated
+# once and then left alone - regenerating the key on every run would make every
+# existing Secret in etcd undecryptable.
+- name: Look for an existing encryption config secret
+  ansible.builtin.set_fact:
+    encryptionconfig_exists: "{{ 'encryptionconfig' in (kops_secrets.stdout | default('')) }}"
+
+- name: Generate an aescbc key for etcd secret encryption
+  ansible.builtin.set_fact:
+    aescbc_key: "{{ lookup('ansible.builtin.password', kops_build_dir + '/.aescbc-key length=32 chars=ascii_letters,digits') | b64encode }}"
+  when: not encryptionconfig_exists
+
+- name: Render the EncryptionConfiguration
+  ansible.builtin.template:
+    src: encryptionconfig.yaml.j2
+    dest: "{{ kops_build_dir }}/encryptionconfig.yaml"
+    mode: "0600"
+  when: not encryptionconfig_exists
+
+- name: Register the EncryptionConfiguration with kOps
+  ansible.builtin.command:
+    cmd: >-
+      kops create secret encryptionconfig
+      -f {{ kops_build_dir }}/encryptionconfig.yaml
+      --name {{ cluster_name }}
+      --state {{ kops_state_store }}
+  register: encconfig_result
+  changed_when: encconfig_result.rc == 0
+  failed_when:
+    - encconfig_result.rc != 0
+    - "'already exists' not in (encconfig_result.stderr | default(''))"
+  when: not encryptionconfig_exists
+  environment: "{{ kops_env }}"
+
+# -----------------------------------------------------------------------------
+# Apply
+# -----------------------------------------------------------------------------
+
+- name: Show the pending infrastructure diff
+  ansible.builtin.command:
+    cmd: kops update cluster --name {{ cluster_name }} --state {{ kops_state_store }}
+  register: kops_diff
+  changed_when: false
+  environment: "{{ kops_env }}"
+
+- name: Pending changes
+  ansible.builtin.debug:
+    var: kops_diff.stdout_lines
+
+- name: Apply the cluster
+  ansible.builtin.command:
+    cmd: >-
+      kops update cluster
+      --name {{ cluster_name }}
+      --state {{ kops_state_store }}
+      --yes --admin
+  register: kops_apply
+  changed_when: true
+  environment: "{{ kops_env }}"
+
+- name: Export an admin kubeconfig
+  ansible.builtin.command:
+    cmd: >-
+      kops export kubeconfig {{ cluster_name }}
+      --state {{ kops_state_store }}
+      --admin={{ kubeconfig_admin_ttl }}
+  changed_when: true
+  environment: "{{ kops_env }}"
+
+# -----------------------------------------------------------------------------
+# Wait for readiness
+# -----------------------------------------------------------------------------
+
+- name: Wait for the cluster to become valid
+  ansible.builtin.command:
+    cmd: >-
+      kops validate cluster
+      --name {{ cluster_name }}
+      --state {{ kops_state_store }}
+      --wait {{ kops_validate_timeout }}
+      --count 3
+  register: kops_validation
+  changed_when: false
+  environment: "{{ kops_env }}"
+
+- name: Validation result
+  ansible.builtin.debug:
+    var: kops_validation.stdout_lines

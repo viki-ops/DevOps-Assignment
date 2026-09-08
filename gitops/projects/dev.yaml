@@ -1,0 +1,55 @@
+# =============================================================================
+# AppProject: dev
+#
+# Application workloads in the dev environment. Deliberately narrower than the
+# platform project: no cluster-scoped resources, and confined to the
+# retail-store namespaces.
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: dev
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Application workloads for the dev environment.
+
+  sourceRepos:
+    - https://github.com/viki-ops/DevOps-Assignment.git
+
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: retail-store-dev
+    - server: https://kubernetes.default.svc
+      namespace: retail-data-dev
+
+  # Empty: application charts have no business creating CRDs, ClusterRoles or
+  # webhooks. If a chart needs one, that is a signal it belongs in the platform
+  # project under review, not that this list should be widened.
+  clusterResourceWhitelist: []
+
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+
+  # Blocked even within the allowed namespaces. A ResourceQuota or LimitRange
+  # shipped by an application chart would let a team raise its own limits,
+  # which defeats the point of having them.
+  namespaceResourceBlacklist:
+    - group: ""
+      kind: ResourceQuota
+    - group: ""
+      kind: LimitRange
+
+  roles:
+    - name: developer
+      description: Sync and inspect dev applications.
+      policies:
+        - p, proj:dev:developer, applications, get, dev/*, allow
+        - p, proj:dev:developer, applications, sync, dev/*, allow
+      groups:
+        - developers
+
+  orphanedResources:
+    warn: true

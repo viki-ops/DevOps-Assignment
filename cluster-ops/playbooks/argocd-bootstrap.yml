@@ -1,0 +1,61 @@
+---
+# =============================================================================
+# argocd-bootstrap.yml - install ArgoCD, then hand control to Git.
+#
+#   ansible-playbook playbooks/argocd-bootstrap.yml
+#
+# This is the last imperative step. Everything after it is a pull request:
+# ArgoCD reconciles gitops/, which includes ArgoCD's own chart, so subsequent
+# changes to ArgoCD go through the same review path as any application.
+#
+# Prerequisite: cluster-create.yml has run and the cluster validates.
+# =============================================================================
+
+- name: Bootstrap ArgoCD
+  hosts: controller
+  gather_facts: true
+  become: false
+
+  pre_tasks:
+    - name: Verify the cluster is reachable
+      ansible.builtin.command: kubectl get --raw /healthz
+      changed_when: false
+
+    - name: Verify the pod-identity-webhook is running
+      ansible.builtin.command: >-
+        kubectl get deployment pod-identity-webhook -n kube-system
+        -o jsonpath={.status.readyReplicas}
+      register: piw
+      changed_when: false
+      failed_when: piw.stdout | default('0') | int < 1
+
+  roles:
+    - argocd
+
+  post_tasks:
+    - name: Collect the initial admin password
+      ansible.builtin.command: >-
+        kubectl -n argocd get secret argocd-initial-admin-secret
+        -o jsonpath={.data.password}
+      register: argocd_admin_b64
+      changed_when: false
+      failed_when: false
+
+    - name: Access instructions
+      ansible.builtin.debug:
+        msg: |
+          ArgoCD {{ argocd_version }} is installed in the {{ argocd_namespace }} namespace.
+
+          The server is ClusterIP only - there is no public endpoint, by design.
+          Reach the UI over a port-forward:
+
+            kubectl port-forward -n argocd svc/argocd-server 8080:80
+            open http://localhost:8080
+
+          Username: admin
+          Password: {{ (argocd_admin_b64.stdout | b64decode)
+                        if argocd_admin_b64.rc == 0
+                        else 'already rotated - the bootstrap secret has been removed' }}
+
+          Rotate and delete the bootstrap secret once a real identity provider
+          is wired in; see cluster-ops/README.md.

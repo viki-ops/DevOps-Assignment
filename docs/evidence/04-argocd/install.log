@@ -1,0 +1,112 @@
+
+PLAY [Bootstrap ArgoCD] ********************************************************
+Tuesday 08 September 2026  03:49:13 +0000 (0:00:00.022)       0:00:00.022 ***** 
+
+TASK [Gathering Facts] *********************************************************
+ok: [localhost]
+Tuesday 08 September 2026  03:49:14 +0000 (0:00:01.470)       0:00:01.493 ***** 
+
+TASK [Verify the cluster is reachable] *****************************************
+ok: [localhost]
+Tuesday 08 September 2026  03:49:16 +0000 (0:00:01.287)       0:00:02.780 ***** 
+
+TASK [Verify the pod-identity-webhook is running] ******************************
+ok: [localhost]
+Tuesday 08 September 2026  03:49:17 +0000 (0:00:01.049)       0:00:03.829 ***** 
+
+TASK [argocd : Ensure the build directory exists] ******************************
+ok: [localhost]
+Tuesday 08 September 2026  03:49:17 +0000 (0:00:00.306)       0:00:04.136 ***** 
+
+TASK [argocd : Read the ArgoCD IRSA role ARN from Terraform] *******************
+ok: [localhost]
+Tuesday 08 September 2026  03:49:27 +0000 (0:00:10.380)       0:00:14.516 ***** 
+
+TASK [argocd : Bind the role ARN to a fact] ************************************
+ok: [localhost]
+Tuesday 08 September 2026  03:49:27 +0000 (0:00:00.046)       0:00:14.562 ***** 
+
+TASK [argocd : Verify the role ARN looks sane] *********************************
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+Tuesday 08 September 2026  03:49:27 +0000 (0:00:00.032)       0:00:14.594 ***** 
+
+TASK [argocd : Check whether the ServiceMonitor CRD is present] ****************
+ok: [localhost]
+Tuesday 08 September 2026  03:49:29 +0000 (0:00:01.746)       0:00:16.341 ***** 
+
+TASK [argocd : Enable ServiceMonitors only if their CRD exists] ****************
+ok: [localhost]
+Tuesday 08 September 2026  03:49:29 +0000 (0:00:00.021)       0:00:16.362 ***** 
+
+TASK [argocd : Report metrics wiring] ******************************************
+ok: [localhost] => {
+    "msg": "No ServiceMonitor CRD yet - metrics exposed but not scraped. Re-run after kube-prometheus-stack syncs."
+}
+Tuesday 08 September 2026  03:49:29 +0000 (0:00:00.032)       0:00:16.395 ***** 
+
+TASK [argocd : Add the argo Helm repository] ***********************************
+ok: [localhost]
+Tuesday 08 September 2026  03:49:30 +0000 (0:00:00.974)       0:00:17.369 ***** 
+
+TASK [argocd : Render the ArgoCD values file] **********************************
+ok: [localhost]
+Tuesday 08 September 2026  03:49:31 +0000 (0:00:00.559)       0:00:17.929 ***** 
+[WARNING]: The default idempotency check can fail to report changes in certain
+cases. Install helm diff >= 3.4.1 for better results.
+
+TASK [argocd : Install or upgrade ArgoCD] **************************************
+ok: [localhost]
+Tuesday 08 September 2026  03:49:37 +0000 (0:00:06.502)       0:00:24.432 ***** 
+
+TASK [argocd : Wait for the ArgoCD server to be available] *********************
+ok: [localhost]
+Tuesday 08 September 2026  03:49:39 +0000 (0:00:01.918)       0:00:26.350 ***** 
+
+TASK [argocd : Verify IRSA was injected into a running repo-server pod] ********
+ok: [localhost]
+Tuesday 08 September 2026  03:49:41 +0000 (0:00:01.512)       0:00:27.862 ***** 
+
+TASK [argocd : Assert the repo-server received AWS credentials] ****************
+ok: [localhost] => {
+    "changed": false,
+    "msg": "IRSA injected: arn:aws:iam::125788629837:role/platform-dev-argocd-repo-server"
+}
+Tuesday 08 September 2026  03:49:41 +0000 (0:00:00.033)       0:00:27.896 ***** 
+
+TASK [Collect the initial admin password] **************************************
+ok: [localhost]
+Tuesday 08 September 2026  03:49:42 +0000 (0:00:01.058)       0:00:28.955 ***** 
+
+TASK [Access instructions] *****************************************************
+ok: [localhost] => {
+    "msg": "ArgoCD 3.5.2 is installed in the argocd namespace.\n\nThe server is ClusterIP only - there is no public endpoint, by design.\nReach the UI over a port-forward:\n\n  kubectl port-forward -n argocd svc/argocd-server 8080:80\n  open http://localhost:8080\n\nUsername: admin\nPassword: <redacted> and delete the bootstrap secret once a real identity provider\nis wired in; see cluster-ops/README.md.\n"
+}
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=18   changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+TASKS RECAP ********************************************************************
+Tuesday 08 September 2026  03:49:42 +0000 (0:00:00.033)       0:00:28.989 ***** 
+=============================================================================== 
+argocd : Read the ArgoCD IRSA role ARN from Terraform ------------------ 10.38s
+argocd : Install or upgrade ArgoCD -------------------------------------- 6.50s
+argocd : Wait for the ArgoCD server to be available --------------------- 1.92s
+argocd : Check whether the ServiceMonitor CRD is present ---------------- 1.75s
+argocd : Verify IRSA was injected into a running repo-server pod -------- 1.51s
+Gathering Facts --------------------------------------------------------- 1.47s
+Verify the cluster is reachable ----------------------------------------- 1.29s
+Collect the initial admin password -------------------------------------- 1.06s
+Verify the pod-identity-webhook is running ------------------------------ 1.05s
+argocd : Add the argo Helm repository ----------------------------------- 0.97s
+argocd : Render the ArgoCD values file ---------------------------------- 0.56s
+argocd : Ensure the build directory exists ------------------------------ 0.31s
+argocd : Bind the role ARN to a fact ------------------------------------ 0.05s
+argocd : Assert the repo-server received AWS credentials ---------------- 0.03s
+Access instructions ----------------------------------------------------- 0.03s
+argocd : Report metrics wiring ------------------------------------------ 0.03s
+argocd : Verify the role ARN looks sane --------------------------------- 0.03s
+argocd : Enable ServiceMonitors only if their CRD exists ---------------- 0.02s

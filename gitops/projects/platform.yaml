@@ -1,0 +1,51 @@
+# =============================================================================
+# AppProject: platform
+#
+# Cluster-wide infrastructure controllers - ingress, DNS, autoscaling, secrets,
+# policy, observability. Separated from the application projects because these
+# legitimately need cluster-scoped permissions, and the application projects
+# must not.
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+  finalizers:
+    # Ensures child Applications are cleaned up before the project is removed,
+    # rather than being orphaned with no project to validate them against.
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Cluster infrastructure controllers managed by the platform team.
+
+  sourceRepos:
+    - https://github.com/viki-ops/DevOps-Assignment.git
+    # Upstream chart repositories, listed explicitly. A wildcard here would let
+    # anyone with commit access run arbitrary charts from any registry.
+    - https://kubernetes.github.io/ingress-nginx
+    - https://kubernetes-sigs.github.io/external-dns
+    - https://kubernetes.github.io/autoscaler
+    - https://aws.github.io/eks-charts
+    - https://charts.external-secrets.io
+    - https://kyverno.github.io/kyverno
+    - https://prometheus-community.github.io/helm-charts
+    - https://argoproj.github.io/argo-helm
+
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: "*"
+
+  # Platform controllers need cluster-scoped resources: CRDs, webhooks,
+  # ClusterRoles, IngressClasses, StorageClasses.
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+
+  orphanedResources:
+    # Warn, do not delete. Automatic deletion of anything ArgoCD does not
+    # recognise is how you lose a resource created by a controller at runtime.
+    warn: true

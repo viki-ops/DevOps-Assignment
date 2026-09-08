@@ -1,0 +1,192 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# =============================================================================
+# GENERATED FILE - DO NOT EDIT BY HAND
+#
+# Instance groups for {{ cluster_name }}.
+#
+#   3x control-plane   one per AZ, private subnets  (odd etcd quorum)
+#   2x worker          on-demand, private           (interruption-sensitive)
+#   2x worker          spot, mixed families         (stateless replicas)
+#   1x bastion         utility subnet               (the only SSH entrypoint)
+#
+# NOTE: the first document deliberately omits its "---" separator. Emitting one
+# straight after this comment block would open an empty first document, which
+# kOps rejects with "Object 'Kind' is missing in 'null'".
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Control plane - one instance group per AZ.
+#
+# Separate groups rather than one group of size 3 because etcd members are
+# pinned to a specific instance group, and because losing an AZ must take down
+# exactly one member.
+# -----------------------------------------------------------------------------
+{% for az in tfk.azs %}
+{% if not loop.first %}
+---
+{% endif %}
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  name: control-plane-{{ az }}
+  labels:
+    kops.k8s.io/cluster: {{ cluster_name }}
+spec:
+  role: ControlPlane
+  machineType: {{ kops.control_plane.machine_type }}
+  minSize: 1
+  maxSize: 1
+  subnets:
+    - {{ az }}
+  rootVolumeSize: {{ kops.control_plane.volume_size }}
+  rootVolumeType: {{ kops.control_plane.volume_type }}
+  rootVolumeEncryption: true
+  rootVolumeEncryptionKey: {{ tfk.kms_key_arn }}
+  nodeLabels:
+    kops.k8s.io/instancegroup: control-plane-{{ az }}
+    node-role.kubernetes.io/control-plane: ""
+  # IMDSv2 only. IMDSv1 lets any pod that can make an HTTP request reach the
+  # node's credentials, which defeats the point of IRSA.
+  instanceMetadata:
+    httpTokens: required
+    httpPutResponseHopLimit: 1
+  cloudLabels:
+    Project: {{ project }}
+    Environment: {{ env }}
+    Role: control-plane
+{% endfor %}
+
+# -----------------------------------------------------------------------------
+# On-demand workers.
+#
+# Carry anything whose interruption would be disruptive or would muddy the
+# evidence: ArgoCD, Prometheus, ingress controllers. The platform chart selects
+# these via the lifecycle=on-demand label.
+# -----------------------------------------------------------------------------
+---
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  name: nodes-ondemand
+  labels:
+    kops.k8s.io/cluster: {{ cluster_name }}
+spec:
+  role: Node
+  machineType: {{ kops.nodes_ondemand.machine_type }}
+  minSize: {{ kops.nodes_ondemand.min_size }}
+  maxSize: {{ kops.nodes_ondemand.max_size }}
+  subnets:
+{% for az in tfk.azs %}
+    - {{ az }}
+{% endfor %}
+  rootVolumeSize: {{ kops.nodes_ondemand.volume_size }}
+  rootVolumeType: {{ kops.nodes_ondemand.volume_type }}
+  rootVolumeEncryption: true
+  rootVolumeEncryptionKey: {{ tfk.kms_key_arn }}
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-ondemand
+    lifecycle: on-demand
+    workload: platform
+  instanceMetadata:
+    httpTokens: required
+    httpPutResponseHopLimit: 1
+  # Consumed by cluster-autoscaler's auto-discovery. Without both tags the
+  # autoscaler cannot see the group at all.
+  cloudLabels:
+    Project: {{ project }}
+    Environment: {{ env }}
+    Role: node
+    lifecycle: on-demand
+    k8s.io/cluster-autoscaler/enabled: "true"
+    k8s.io/cluster-autoscaler/{{ cluster_name }}: "owned"
+    k8s.io/cluster-autoscaler/node-template/label/lifecycle: on-demand
+
+# -----------------------------------------------------------------------------
+# Spot workers.
+#
+# Mixed instances across three families: if one capacity pool is exhausted the
+# ASG falls back to another rather than failing to scale. capacity-optimized
+# allocation picks the pool least likely to be reclaimed, which matters more
+# than shaving a few cents with lowest-price.
+# -----------------------------------------------------------------------------
+---
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  name: nodes-spot
+  labels:
+    kops.k8s.io/cluster: {{ cluster_name }}
+spec:
+  role: Node
+  machineType: {{ kops.nodes_spot.machine_types[0] }}
+  minSize: {{ kops.nodes_spot.min_size }}
+  maxSize: {{ kops.nodes_spot.max_size }}
+  subnets:
+{% for az in tfk.azs %}
+    - {{ az }}
+{% endfor %}
+  rootVolumeSize: {{ kops.nodes_spot.volume_size }}
+  rootVolumeType: {{ kops.nodes_spot.volume_type }}
+  rootVolumeEncryption: true
+  rootVolumeEncryptionKey: {{ tfk.kms_key_arn }}
+  mixedInstancesPolicy:
+    instances:
+{% for t in kops.nodes_spot.machine_types %}
+      - {{ t }}
+{% endfor %}
+    onDemandBase: {{ kops.nodes_spot.on_demand_base }}
+    onDemandAboveBase: {{ kops.nodes_spot.on_demand_above_base_percentage }}
+    spotAllocationStrategy: capacity-optimized
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-spot
+    lifecycle: spot
+    workload: apps
+  # Taint-free on purpose: the retail services are stateless and replicated, so
+  # they can and should land here. Anything that must avoid spot uses the
+  # lifecycle=on-demand nodeSelector instead of relying on a taint.
+  instanceMetadata:
+    httpTokens: required
+    httpPutResponseHopLimit: 1
+  cloudLabels:
+    Project: {{ project }}
+    Environment: {{ env }}
+    Role: node
+    lifecycle: spot
+    k8s.io/cluster-autoscaler/enabled: "true"
+    k8s.io/cluster-autoscaler/{{ cluster_name }}: "owned"
+    k8s.io/cluster-autoscaler/node-template/label/lifecycle: spot
+
+# -----------------------------------------------------------------------------
+# Bastion.
+#
+# The only route to a private node's SSH port, and the DNS resolver for the
+# private hosted zone when tunnelling (ssh -D). Sized at t3.micro because it
+# forwards packets and nothing else.
+# -----------------------------------------------------------------------------
+---
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  name: bastion
+  labels:
+    kops.k8s.io/cluster: {{ cluster_name }}
+spec:
+  role: Bastion
+  machineType: {{ kops.bastion.machine_type }}
+  minSize: 1
+  maxSize: 1
+  subnets:
+{% for az in tfk.azs %}
+    - utility-{{ az }}
+{% endfor %}
+  rootVolumeSize: {{ kops.bastion.volume_size }}
+  rootVolumeType: gp3
+  nodeLabels:
+    kops.k8s.io/instancegroup: bastion
+  instanceMetadata:
+    httpTokens: required
+    httpPutResponseHopLimit: 1
+  cloudLabels:
+    Project: {{ project }}
+    Environment: {{ env }}
+    Role: bastion

@@ -1,0 +1,49 @@
+{
+    "Url": "platform-dev-oidc-eun1-125788629837.s3.eu-north-1.amazonaws.com",
+    "ClientIDList": [
+        "sts.amazonaws.com",
+        "amazonaws.com"
+    ],
+    "ThumbprintList": [
+        "06b25927c42a721631c1efd9431e648fa62e1e39"
+    ],
+    "CreateDate": "2026-09-07T07:30:56.996000+00:00",
+    "Tags": [
+        {
+            "Key": "Project",
+            "Value": "platform"
+        },
+        {
+            "Key": "Owner",
+            "Value": "viki-ops"
+        },
+        {
+            "Key": "ManagedBy",
+            "Value": "terraform"
+        },
+        {
+            "Key": "Cluster",
+            "Value": "dev.k8s.local"
+        },
+        {
+            "Key": "Environment",
+            "Value": "dev"
+        },
+        {
+            "Key": "Purpose",
+            "Value": "irsa-oidc-discovery"
+        },
+        {
+            "Key": "Module",
+            "Value": "infra-modules/kops-oidc"
+        },
+        {
+            "Key": "Name",
+            "Value": "platform-dev-oidc-eun1-125788629837-oidc"
+        },
+        {
+            "Key": "Stack",
+            "Value": "infra-live/dev"
+        }
+    ]
+}

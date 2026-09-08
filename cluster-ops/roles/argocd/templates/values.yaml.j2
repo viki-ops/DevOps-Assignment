@@ -1,0 +1,184 @@
+# =============================================================================
+# GENERATED FILE - DO NOT EDIT BY HAND
+#
+# Helm values for the argo-cd chart, rendered by cluster-ops/roles/argocd.
+# Chart {{ argocd_chart_version }} (ArgoCD v{{ argocd_version }}).
+#
+# ArgoCD is the one component installed imperatively, because it is what makes
+# everything after it declarative. Once it is running it manages itself through
+# the app-of-apps in gitops/ - including this chart - so day-2 changes are pull
+# requests, not Ansible runs.
+# =============================================================================
+
+global:
+  # Keep the control plane off spot capacity. A reclaimed spot node during a
+  # sync leaves Applications in a transient degraded state that looks like a
+  # real failure, which is exactly the noise we do not want while
+  # demonstrating promotion and failure injection.
+  nodeSelector:
+    lifecycle: on-demand
+
+configs:
+  cm:
+    # Lets Applications be pruned and self-healed only where a policy allows
+    # it; per-environment behaviour is set on each Application in gitops/.
+    application.resourceTrackingMethod: annotation
+    timeout.reconciliation: 180s
+    # Surfaces the app-of-apps hierarchy in the UI.
+    application.instanceLabelKey: argocd.argoproj.io/instance
+
+  params:
+    # TLS is terminated at the ingress, so the server itself speaks plain HTTP.
+    # Without this the server redirects to HTTPS and the ingress health check
+    # loops.
+    server.insecure: true
+
+  # ---------------------------------------------------------------------------
+  # RBAC
+  #
+  # The default policy is role:readonly, so an authenticated user who matches
+  # no group gets look-but-not-touch rather than the chart default of no access
+  # at all (which produces confusing empty dashboards) or admin.
+  # ---------------------------------------------------------------------------
+  rbac:
+    policy.default: role:readonly
+    scopes: "[groups]"
+    policy.csv: |
+      # platform-admins: full control, including destructive actions.
+      p, role:platform-admin, applications, *, */*, allow
+      p, role:platform-admin, clusters, *, *, allow
+      p, role:platform-admin, repositories, *, *, allow
+      p, role:platform-admin, projects, *, *, allow
+      p, role:platform-admin, exec, create, */*, allow
+
+      # developers: may sync dev freely, and may see everything else.
+      # Deliberately NOT granted sync on stage or prod - promotion to those
+      # environments goes through a pull request, which is the whole point of
+      # the promotion gate. Granting sync here would let someone bypass it
+      # from the UI.
+      p, role:developer, applications, get, */*, allow
+      p, role:developer, applications, sync, dev/*, allow
+      p, role:developer, applications, action/*, dev/*, allow
+      p, role:developer, logs, get, */*, allow
+      p, role:developer, projects, get, *, allow
+
+      # release-managers: may sync stage and prod, but may not delete
+      # Applications or change project definitions.
+      p, role:release-manager, applications, get, */*, allow
+      p, role:release-manager, applications, sync, stage/*, allow
+      p, role:release-manager, applications, sync, prod/*, allow
+      p, role:release-manager, logs, get, */*, allow
+
+      g, platform-admins, role:platform-admin
+      g, developers, role:developer
+      g, release-managers, role:release-manager
+
+      # The built-in admin account is disabled below; this binding exists so
+      # the local account used during bootstrap has a role while it is active.
+      g, admin, role:platform-admin
+
+# ---------------------------------------------------------------------------
+# Controller
+# ---------------------------------------------------------------------------
+controller:
+  replicas: 1
+  serviceAccount:
+    create: true
+    name: argocd-application-controller
+    annotations:
+      # IRSA. The controller needs AWS access to read image digests from ECR
+      # when resolving digest-pinned images.
+      eks.amazonaws.com/role-arn: {{ argocd_role_arn }}
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      # No CPU limit on purpose: throttling the controller during a large sync
+      # makes reconciliation arbitrarily slow and looks like ArgoCD hanging.
+      # Memory is limited because a leak here should be killed, not swapped.
+      memory: 1Gi
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: {{ argocd_service_monitor | lower }}
+
+# ---------------------------------------------------------------------------
+# Repo server
+# ---------------------------------------------------------------------------
+repoServer:
+  replicas: 2
+  serviceAccount:
+    create: true
+    name: argocd-repo-server
+    annotations:
+      eks.amazonaws.com/role-arn: {{ argocd_role_arn }}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: {{ argocd_service_monitor | lower }}
+
+# ---------------------------------------------------------------------------
+# Server
+# ---------------------------------------------------------------------------
+server:
+  replicas: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: {{ argocd_service_monitor | lower }}
+
+  # Ingress is added by the platform chart via GitOps once ingress-nginx and
+  # cert-manager ClusterIssuers exist. Creating it here would produce an
+  # Ingress with no controller to serve it.
+  ingress:
+    enabled: false
+
+  service:
+    type: ClusterIP
+
+applicationSet:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: {{ argocd_service_monitor | lower }}
+
+notifications:
+  enabled: true
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: {{ argocd_service_monitor | lower }}
+
+dex:
+  # No external identity provider in this environment, so Dex would run and do
+  # nothing. RBAC groups above are ready for it if SSO is added.
+  enabled: false
+
+redis:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
