@@ -24,7 +24,9 @@ spec:
     - server: https://kubernetes.default.svc
       namespace: retail-data-stage
 
-  clusterResourceWhitelist: []
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
 
   namespaceResourceWhitelist:
     - group: "*"

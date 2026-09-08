@@ -24,10 +24,11 @@ spec:
     - server: https://kubernetes.default.svc
       namespace: retail-data-dev
 
-  # Empty: application charts have no business creating CRDs, ClusterRoles or
-  # webhooks. If a chart needs one, that is a signal it belongs in the platform
-  # project under review, not that this list should be widened.
-  clusterResourceWhitelist: []
+  # Empty would block CreateNamespace=true. Namespaces are the one cluster-scoped
+  # resource application projects need; everything else stays forbidden.
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
 
   namespaceResourceWhitelist:
     - group: "*"
