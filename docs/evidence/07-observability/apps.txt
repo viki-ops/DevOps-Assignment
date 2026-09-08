@@ -1,0 +1,3 @@
+NAME                    SYNC STATUS   HEALTH STATUS   REVISION                                   PROJECT
+kube-prometheus-stack   Synced        Healthy                                                    platform
+observability-config    Synced        Healthy         79118539fb7a6e9124e598b62ef7eb3290236940   platform

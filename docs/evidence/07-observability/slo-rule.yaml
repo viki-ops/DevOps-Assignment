@@ -1,0 +1,97 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: observability-config:monitoring.coreos.com/PrometheusRule:monitoring/retail-storefront-slo
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"monitoring.coreos.com/v1","kind":"PrometheusRule","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"observability-config:monitoring.coreos.com/PrometheusRule:monitoring/retail-storefront-slo"},"labels":{"app.kubernetes.io/part-of":"platform","release":"kube-prometheus-stack"},"name":"retail-storefront-slo","namespace":"monitoring"},"spec":{"groups":[{"name":"retail-storefront.slo","rules":[{"expr":"sum(rate(nginx_ingress_controller_requests{ingress=\"ui\",exported_namespace=\"retail-store-dev\"}[5m]))\n","record":"retail:sli:requests:rate5m"},{"expr":"sum(rate(nginx_ingress_controller_requests{ingress=\"ui\",exported_namespace=\"retail-store-dev\",status=~\"5..\"}[5m]))\nor vector(0)\n","record":"retail:sli:errors:rate5m"},{"expr":"1 - (\n  retail:sli:errors:rate5m\n  /\n  clamp_min(retail:sli:requests:rate5m, 1e-9)\n)\n","record":"retail:sli:availability:ratio5m"},{"expr":"1 - (\n  (\n    sum(rate(nginx_ingress_controller_requests{ingress=\"ui\",exported_namespace=\"retail-store-dev\",status=~\"5..\"}[1h]))\n    or vector(0)\n  )\n  /\n  clamp_min(sum(rate(nginx_ingress_controller_requests{ingress=\"ui\",exported_namespace=\"retail-store-dev\"}[1h])), 1e-9)\n)\n","record":"retail:sli:availability:ratio1h"},{"expr":"1 - (\n  (\n    sum(rate(nginx_ingress_controller_requests{ingress=\"ui\",exported_namespace=\"retail-store-dev\",status=~\"5..\"}[6h]))\n    or vector(0)\n  )\n  /\n  clamp_min(sum(rate(nginx_ingress_controller_requests{ingress=\"ui\",exported_namespace=\"retail-store-dev\"}[6h])), 1e-9)\n)\n","record":"retail:sli:availability:ratio6h"},{"alert":"RetailStorefrontErrorBudgetFastBurn","annotations":{"description":"5m availability {{ $value | humanizePercentage }} is below the 14.4x burn threshold (92.8%) for the 99.5% SLO. At this rate the 30-day error budget would be exhausted in ~2.5 hours.","summary":"Retail storefront is burning error budget fast"},"expr":"(\n  retail:sli:availability:ratio5m \u003c (1 - 14.4 * 0.005)\n  and\n  retail:sli:availability:ratio1h \u003c (1 - 14.4 * 0.005)\n)\n","for":"2m","labels":{"service":"retail-storefront","severity":"critical","slo":"99.5"}},{"alert":"RetailStorefrontErrorBudgetSlowBurn","annotations":{"description":"Sustained elevated 5xx rate against the 99.5% SLO. Investigate before the monthly error budget is consumed.","summary":"Retail storefront is burning error budget slowly"},"expr":"(\n  (\n    1 - (\n      (\n        sum(rate(nginx_ingress_controller_requests{ingress=\"ui\",exported_namespace=\"retail-store-dev\",status=~\"5..\"}[30m]))\n        or vector(0)\n      )\n      /\n      clamp_min(sum(rate(nginx_ingress_controller_requests{ingress=\"ui\",exported_namespace=\"retail-store-dev\"}[30m])), 1e-9)\n    )\n  ) \u003c (1 - 6 * 0.005)\n  and\n  retail:sli:availability:ratio6h \u003c (1 - 6 * 0.005)\n)\n","for":"15m","labels":{"service":"retail-storefront","severity":"warning","slo":"99.5"}}]}]}}
+    prometheus-operator-validated: "true"
+  creationTimestamp: "2026-09-08T04:42:32Z"
+  generation: 2
+  labels:
+    app.kubernetes.io/part-of: platform
+    release: kube-prometheus-stack
+  name: retail-storefront-slo
+  namespace: monitoring
+  resourceVersion: "347915"
+  uid: 1bf109c1-cea2-4c3e-8acf-666a7169c35c
+spec:
+  groups:
+  - name: retail-storefront.slo
+    rules:
+    - expr: |
+        sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev"}[5m]))
+      record: retail:sli:requests:rate5m
+    - expr: |
+        sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[5m]))
+        or vector(0)
+      record: retail:sli:errors:rate5m
+    - expr: |
+        1 - (
+          retail:sli:errors:rate5m
+          /
+          clamp_min(retail:sli:requests:rate5m, 1e-9)
+        )
+      record: retail:sli:availability:ratio5m
+    - expr: |
+        1 - (
+          (
+            sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[1h]))
+            or vector(0)
+          )
+          /
+          clamp_min(sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev"}[1h])), 1e-9)
+        )
+      record: retail:sli:availability:ratio1h
+    - expr: |
+        1 - (
+          (
+            sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[6h]))
+            or vector(0)
+          )
+          /
+          clamp_min(sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev"}[6h])), 1e-9)
+        )
+      record: retail:sli:availability:ratio6h
+    - alert: RetailStorefrontErrorBudgetFastBurn
+      annotations:
+        description: 5m availability {{ $value | humanizePercentage }} is below the
+          14.4x burn threshold (92.8%) for the 99.5% SLO. At this rate the 30-day
+          error budget would be exhausted in ~2.5 hours.
+        summary: Retail storefront is burning error budget fast
+      expr: |
+        (
+          retail:sli:availability:ratio5m < (1 - 14.4 * 0.005)
+          and
+          retail:sli:availability:ratio1h < (1 - 14.4 * 0.005)
+        )
+      for: 2m
+      labels:
+        service: retail-storefront
+        severity: critical
+        slo: "99.5"
+    - alert: RetailStorefrontErrorBudgetSlowBurn
+      annotations:
+        description: Sustained elevated 5xx rate against the 99.5% SLO. Investigate
+          before the monthly error budget is consumed.
+        summary: Retail storefront is burning error budget slowly
+      expr: |
+        (
+          (
+            1 - (
+              (
+                sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev",status=~"5.."}[30m]))
+                or vector(0)
+              )
+              /
+              clamp_min(sum(rate(nginx_ingress_controller_requests{ingress="ui",exported_namespace="retail-store-dev"}[30m])), 1e-9)
+            )
+          ) < (1 - 6 * 0.005)
+          and
+          retail:sli:availability:ratio6h < (1 - 6 * 0.005)
+        )
+      for: 15m
+      labels:
+        service: retail-storefront
+        severity: warning
+        slo: "99.5"

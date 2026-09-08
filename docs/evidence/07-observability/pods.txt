@@ -1,0 +1,14 @@
+NAME                                                        READY   STATUS    RESTARTS   AGE
+alertmanager-kube-prometheus-stack-alertmanager-0           2/2     Running   0          7m30s
+kube-prometheus-stack-grafana-74b74f7-nnmx4                 3/3     Running   0          7m36s
+kube-prometheus-stack-kube-state-metrics-76d58dfd4c-k74ft   1/1     Running   0          7m37s
+kube-prometheus-stack-operator-7648d45cb8-6r8bn             1/1     Running   0          7m37s
+kube-prometheus-stack-prometheus-node-exporter-7m8qj        1/1     Running   0          7m37s
+kube-prometheus-stack-prometheus-node-exporter-b9q7r        1/1     Running   0          7m37s
+kube-prometheus-stack-prometheus-node-exporter-cmkj9        1/1     Running   0          7m37s
+kube-prometheus-stack-prometheus-node-exporter-dmhhc        1/1     Running   0          7m37s
+kube-prometheus-stack-prometheus-node-exporter-fdcs8        1/1     Running   0          7m37s
+kube-prometheus-stack-prometheus-node-exporter-hw4ns        1/1     Running   0          7m37s
+kube-prometheus-stack-prometheus-node-exporter-k7gbx        1/1     Running   0          6m12s
+kube-prometheus-stack-prometheus-node-exporter-t6qpr        1/1     Running   0          7m37s
+prometheus-kube-prometheus-stack-prometheus-0               2/2     Running   0          7m25s
